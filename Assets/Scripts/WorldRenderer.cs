@@ -54,7 +54,7 @@ public class WorldRenderer : MonoBehaviour
 
         mesh.vertices = verts.ToArray();
         mesh.triangles = tris.ToArray();
-        //mesh.uv = uvs.ToArray();
+        mesh.uv = uvs.ToArray();
 
         mesh.RecalculateNormals();
 
@@ -63,7 +63,7 @@ public class WorldRenderer : MonoBehaviour
     }
 
     public void BuildChunkMesh(Chunk chunk){
-        Debug.Log("BuildChunkMesh:"+chunk.BlockPos);
+        //Debug.Log("BuildChunkMesh:"+chunk.BlockPos);
 
         var chunkWorldPosStart = chunk.BlockPos;
         var chunkWorldPosEnd = chunk.BlockPos + Chunk.SIZE;
@@ -73,7 +73,8 @@ public class WorldRenderer : MonoBehaviour
                 for(int y=chunkWorldPosStart.Y;y<chunkWorldPosEnd.Y;y++){
                     BlockPos blockPos = new BlockPos(x, y, z);
 
-                    if(!world.GetBlockStates(blockPos).Block.IsSolid) continue;
+                    BlockState blockState = world.GetBlockStates(blockPos);
+                    if(!blockState.Block.IsSolid) continue;
 
                     //Above
                     if(!world.GetBlockStates(blockPos.Above()).Block.IsSolid){
@@ -81,7 +82,9 @@ public class WorldRenderer : MonoBehaviour
                         verts.Add(new Vector3(0, 1, 1)+blockPos);
                         verts.Add(new Vector3(1, 1, 1)+blockPos);
                         verts.Add(new Vector3(1, 1, 0)+blockPos);
-                        numFaces++; 
+                        numFaces++;
+
+                        uvs.AddRange(blockState.Block.Material.GetUVs());
                     }
                     
                     //Below
@@ -91,6 +94,8 @@ public class WorldRenderer : MonoBehaviour
                         verts.Add(new Vector3(1, 0, 1)+blockPos);
                         verts.Add(new Vector3(0, 0, 1)+blockPos);
                         numFaces++;
+
+                        uvs.AddRange(blockState.Block.Material.GetUVs());
                     }
 
                     //South
@@ -100,6 +105,8 @@ public class WorldRenderer : MonoBehaviour
                         verts.Add(new Vector3(1, 1, 0)+blockPos);
                         verts.Add(new Vector3(1, 0, 0)+blockPos);
                         numFaces++;
+
+                        uvs.AddRange(blockState.Block.Material.GetUVs());
                     }
 
                     //East
@@ -109,6 +116,8 @@ public class WorldRenderer : MonoBehaviour
                         verts.Add(new Vector3(1, 1, 1)+blockPos);
                         verts.Add(new Vector3(1, 0, 1)+blockPos);
                         numFaces++;
+
+                        uvs.AddRange(blockState.Block.Material.GetUVs());
                     }
 
                     //North
@@ -118,6 +127,8 @@ public class WorldRenderer : MonoBehaviour
                         verts.Add(new Vector3(0, 1, 1)+blockPos);
                         verts.Add(new Vector3(0, 0, 1)+blockPos);
                         numFaces++;
+
+                        uvs.AddRange(blockState.Block.Material.GetUVs());
                     }
 
                     //West
@@ -127,6 +138,8 @@ public class WorldRenderer : MonoBehaviour
                         verts.Add(new Vector3(0, 1, 0)+blockPos);
                         verts.Add(new Vector3(0, 0, 0)+blockPos);
                         numFaces++;
+
+                        uvs.AddRange(blockState.Block.Material.GetUVs());
                     }
                 }
             }

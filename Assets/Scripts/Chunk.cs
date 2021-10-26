@@ -16,7 +16,7 @@ public class Chunk
     }
 
     public BlockState GetBlockState(BlockPos pos){
-        Debug.Log("Chunk GetBlockStates: "+pos+ " for BlockPos: "+BlockPos);
+        //Debug.Log("Chunk GetBlockStates: "+pos+ " for BlockPos: "+BlockPos);
 
         if(BlockPos.InRange(BlockPos, BlockPos+SIZE, pos)){
             var relativePos = pos - BlockPos;

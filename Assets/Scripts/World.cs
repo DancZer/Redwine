@@ -29,7 +29,7 @@ public class World
     public BlockState GetBlockStates(BlockPos pos)
     {
         var relativePos = pos-PlayerPos;
-        Debug.Log("World GetBlockStates: "+pos+ " for relativePos: "+relativePos + " viewDist: "+VIEW_DISTANCE_BLOCK);
+        //Debug.Log("World GetBlockStates: "+pos+ " for relativePos: "+relativePos + " viewDist: "+VIEW_DISTANCE_BLOCK);
 
         if(BlockPos.InRange(-VIEW_DISTANCE_BLOCK, VIEW_DISTANCE_BLOCK, relativePos)){
             return GetChunk(relativePos).GetBlockState(pos);
@@ -41,7 +41,7 @@ public class World
     private Chunk GetChunk(BlockPos relativePos){
         var chunkIdx = (relativePos+VIEW_DISTANCE_BLOCK)/Chunk.SIZE;
 
-        Debug.Log("Selected ChunkIdx: "+chunkIdx+ " for relativePos: "+relativePos);
+        //Debug.Log("Selected ChunkIdx: "+chunkIdx+ " for relativePos: "+relativePos);
 
         return Chunks[chunkIdx.X, chunkIdx.Y, chunkIdx.Z];
     }

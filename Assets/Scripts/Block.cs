@@ -10,10 +10,13 @@ public class Block
 
     public bool IsSolid => !(IsAir || IsLiquid);
 
-    public Block(bool air, bool liquid)
+    public BlockMaterial Material {get;}
+
+    public Block(bool air, bool liquid, BlockMaterial material)
     {
         IsAir = air;
         IsLiquid = liquid;
+        Material = material;
     }
 
     public BlockState Default(){
