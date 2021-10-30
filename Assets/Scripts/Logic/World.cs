@@ -23,9 +23,12 @@ public class World
 
     public bool Update(BlockPos playerPos){
         var chunkPos = PosToChunkPos(playerPos);
+        
 
         if(Vector3.Distance(chunkPos.Vect, CenterChunkPos.Vect) >= Chunk.SIZE){
             CenterChunkPos = chunkPos;
+
+            Debug.Log("CenterChunkPos: "+CenterChunkPos);
 
             LoadChunks();
 
@@ -53,7 +56,7 @@ public class World
 
         var blockPos = (chunkPos*Chunk.SIZE-pos).Abs();
 
-        Debug.Log("World GetBlockStates: "+pos+ " for chunkPos: "+chunkPos+" chunkIdx:"+chunkIdx + " relBlockPos: "+blockPos);
+       // Debug.Log("World GetBlockStates: "+pos+ " for chunkPos: "+chunkPos+" chunkIdx:"+chunkIdx + " relBlockPos: "+blockPos);
 
         if(BlockPos.InRange(0, SIZE, chunkIdx)){
             return Chunks[chunkIdx.X, chunkIdx.Y, chunkIdx.Z].GetBlockStateRelative(blockPos);
@@ -77,6 +80,6 @@ public class World
             vect.z = 1;
         }
 
-        return (pos-vect*Chunk.SIZE)/Chunk.SIZE+vect;
+        return ((pos-vect*Chunk.SIZE)/Chunk.SIZE)*Chunk.SIZE;
     }
 }

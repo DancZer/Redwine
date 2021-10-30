@@ -68,42 +68,49 @@ public class BlockPos
     public static BlockPos operator +(BlockPos a){
         return a;
     }
-
     public static BlockPos operator -(BlockPos a){
         return new BlockPos(-a.X, -a.Y, -a.Z);
     }
     
-    public static BlockPos operator -(BlockPos a, BlockPos b){
-        return new BlockPos(a.X-b.X, a.Y-b.Y, a.Z-b.Z);
-    }
     
+    public static BlockPos operator +(BlockPos a, Vector3Int b){
+        return new BlockPos(a.X+b.x, a.Y+b.y, a.Z+b.z);
+    }
     public static BlockPos operator -(BlockPos a, Vector3Int b){
         return new BlockPos(a.X-b.x, a.Y-b.y, a.Z-b.z);
+    }
+    
+
+    public static BlockPos operator +(BlockPos a, int b){
+        return new BlockPos(a.X+b, a.Y+b, a.Z+b);
     }
     public static BlockPos operator -(BlockPos a, int b){
         return new BlockPos(a.X-b, a.Y-b, a.Z-b);
     }
 
+
     public static BlockPos operator +(BlockPos a, BlockPos b){
         return new BlockPos(a.X+b.X, a.Y+b.Y, a.Z+b.Z);
     }
-    
-    public static BlockPos operator +(BlockPos a, Vector3Int b){
-        return new BlockPos(a.X+b.x, a.Y+b.y, a.Z+b.z);
+    public static BlockPos operator -(BlockPos a, BlockPos b){
+        return new BlockPos(a.X-b.X, a.Y-b.Y, a.Z-b.Z);
     }
-
+    
     public static Vector3Int operator +(Vector3Int b, BlockPos a){
         return new Vector3Int(a.X+b.x, a.Y+b.y, a.Z+b.z);
+    }
+    public static Vector3Int operator -(Vector3Int b, BlockPos a){
+        return new Vector3Int(a.X-b.x, a.Y-b.y, a.Z-b.z);
     }
 
     public static Vector3 operator +(Vector3 b, BlockPos a){
         return new Vector3(a.X+b.x, a.Y+b.y, a.Z+b.z);
     }
+    public static Vector3 operator -(Vector3 b, BlockPos a){
+        return new Vector3(a.X-b.x, a.Y-b.y, a.Z-b.z);
+    } 
+
     
-    public static BlockPos operator +(BlockPos a, int b){
-        return new BlockPos(a.X+b, a.Y+b, a.Z+b);
-    }
-        
     public static BlockPos operator *(int b, BlockPos a){
         return new BlockPos(a.X*b, a.Y*b, a.Z*b);
     }

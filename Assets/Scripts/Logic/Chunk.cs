@@ -14,7 +14,7 @@ public class Chunk
     }
 
     public BlockState GetBlockStateRelative(BlockPos relativePos){
-        Debug.Log("GetBlockState GetPos:" + relativePos + " for ChunkPos: "+Pos+" for ChunkPosEnd: "+(Pos+SIZE));
+        //Debug.Log("GetBlockState GetPos:" + relativePos + " for ChunkPos: "+Pos+" for ChunkPosEnd: "+(Pos+SIZE));
 
         if(BlockPos.InRange(0, SIZE, relativePos)){
             return BlockStates[relativePos.X, relativePos.Y, relativePos.Z];
@@ -24,8 +24,7 @@ public class Chunk
     }
 
     public void SetBlockState(BlockPos relativePos, BlockState state){
-
-        Debug.Log("SetBlockState SetPos:" + relativePos + " for ChunkPos: "+Pos+" for ChunkPosEnd: "+(Pos+SIZE));
+        //Debug.Log("SetBlockState SetPos:" + relativePos + " for ChunkPos: "+Pos+" for ChunkPosEnd: "+(Pos+SIZE));
 
         if(BlockPos.InRange(0, SIZE, relativePos)){   
             BlockStates[relativePos.X, relativePos.Y, relativePos.Z] = state;
