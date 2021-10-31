@@ -11,10 +11,14 @@ public class BlockMaterial
 
         private Vector2[] uvs;
 
-        public BlockMaterial(int xPos, int yPos)
+        private string Name {get;}
+
+        public BlockMaterial(int xPos, int yPos, string name)
         {
             this.xPos = xPos;
             this.yPos = yPos;
+            this.Name = name;
+
             uvs = new Vector2[]
             {
                 new Vector2(xPos/MATERIAL_COUNT + MARGIN, yPos/MATERIAL_COUNT + MARGIN),
@@ -24,8 +28,20 @@ public class BlockMaterial
             };
         }
 
+        public Vector2 GetOffset(){
+            return uvs[0];
+        }
+
+        public Vector2 GetScale(){
+            return new Vector2(1f/MATERIAL_COUNT, 1f/MATERIAL_COUNT);
+        }
+
         public Vector2[] GetUVs()
         {
             return uvs;
+        }
+
+        public override string ToString(){
+            return Name;
         }
     }

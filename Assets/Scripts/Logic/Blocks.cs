@@ -6,5 +6,5 @@ public class Blocks
 {
     public static Block Air = new Block(true, false, null);
     public static Block Dirt = new Block(false, false, BlockMaterials.Dirt);
-    public static Block Water = new Block(false, true, BlockMaterials.Water1);
+    public static Block Water = new Block(false, true, BlockMaterials.WaterTop);
 }

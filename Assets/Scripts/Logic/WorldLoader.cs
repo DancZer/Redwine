@@ -18,7 +18,7 @@ public class WorldLoader
 
         if(!_cache.TryGetValue(pos.ToString(), out chunk)){
             chunk = GenerateChunk(pos);
-
+            
             _cache.Add(pos.ToString(), chunk);
         }
 
@@ -34,11 +34,11 @@ public class WorldLoader
                 var baseLine = GetBaseLandHeight(pos.X+x, pos.Z+z);
 
                 for(int y=0;y<Chunk.SIZE;y++){
-                    Block block = Blocks.Dirt;
+                    Block block = Blocks.Air;
 
-                   /* if(y<=baseLine){
+                    if(chunk.Pos.Y + y < 0){
                         block = Blocks.Dirt;
-                    }*/
+                    }
 
                     chunk.SetBlockState(new BlockPos(x, y, z), block.Default());
                 }

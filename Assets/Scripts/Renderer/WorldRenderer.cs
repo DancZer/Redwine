@@ -20,7 +20,7 @@ public class WorldRenderer : MonoBehaviour
 
         CreateRenderers();
 
-        world = new World();
+        world = World.Instance();
         world.Init();
 
         Render();
@@ -53,10 +53,13 @@ public class WorldRenderer : MonoBehaviour
             for(int z=0;z<World.SIZE;z++){
                 for(int y=0;y<World.SIZE;y++){
                     var obj = ChunkRenderers[x,y,z];
+                    obj.SetActive(false);
+
                     var renderer = obj.GetComponent<ChunkRendererInterface>();
                     renderer.World = world;
                     renderer.Chunk = world.Chunks[x,y,z];
 
+                    obj.name = renderer.Chunk.Name;
                     obj.transform.position = renderer.Chunk.Pos.Vect;
                     obj.SetActive(true);
                 }

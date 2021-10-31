@@ -24,6 +24,6 @@ public class Block
     }
 
     override public string ToString(){
-        return $"IsAir: {IsAir}, IsLiquid:{IsLiquid}";
+        return $"IsAir:{IsAir}, IsLiquid:{IsLiquid}, Material:{Material}";
     }
 }

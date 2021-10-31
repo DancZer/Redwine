@@ -62,7 +62,7 @@ public class BlockPos
     }
 
     override public string ToString(){
-        return $"X: {X}, Z:{Z}, Y:{Y}";
+        return $"X:{X} Y:{Y} Z:{Z}";
     }
 
     public static BlockPos operator +(BlockPos a){
