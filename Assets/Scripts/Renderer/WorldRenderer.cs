@@ -11,6 +11,8 @@ public class WorldRenderer : MonoBehaviour
     public MonoBehaviour Player;
     public GameObject ChunkRendererPrefab;
 
+    private BlockPos PrevPlayerPos = new BlockPos();
+
     // Start is called before the first frame update
     void Start()
     {        
@@ -41,8 +43,28 @@ public class WorldRenderer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(world.Update(new BlockPos(Vector3Int.FloorToInt(Player.transform.position)))){
+        bool shouldRender = false;
+
+        var playerPos = new BlockPos(Vector3Int.FloorToInt(Player.transform.position));
+        if(world.Update(playerPos)){
             world.LoadChunks();
+            shouldRender = true;
+        }
+
+        //SKIP block rendering where the player is
+        if(PrevPlayerPos != playerPos){
+            var playerBlockState = world.GetBlockStates(PrevPlayerPos);
+            playerBlockState.Enabled = true;
+
+            playerBlockState = world.GetBlockStates(playerPos);
+            playerBlockState.Enabled = false;
+
+            PrevPlayerPos = playerPos;
+            
+            shouldRender = true;
+        }
+
+        if(shouldRender){
             Render();
         }
     }

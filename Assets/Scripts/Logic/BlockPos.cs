@@ -115,7 +115,7 @@ public class BlockPos
         return new BlockPos(a.X*b, a.Y*b, a.Z*b);
     }
     public static BlockPos operator *(BlockPos a, int b){
-        return new BlockPos(a.X*b, a.Y*b, a.Z*b);
+        return b*a;
     }
 
     public static BlockPos operator /(BlockPos a, int b){
@@ -124,6 +124,13 @@ public class BlockPos
 
     public static BlockPos operator %(BlockPos a, int b){
         return new BlockPos(a.X%b, a.Y%b, a.Z%b);
+    }
+
+    public static bool operator ==(BlockPos a, BlockPos b){
+        return a.X == b.X && a.Y == b.Y && a.Z == b.Z;
+    }
+    public static bool operator !=(BlockPos a, BlockPos b){
+        return !(a == b);
     }
 
     public static bool InRange(BlockPos from, BlockPos to, BlockPos a){

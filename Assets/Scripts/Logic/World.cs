@@ -10,7 +10,8 @@ public class World
 
     public Chunk[,,] Chunks = new Chunk[SIZE, SIZE, SIZE];
 
-    public BlockPos CenterChunkPos = new BlockPos();
+    private BlockPos CenterChunkPos = new BlockPos();
+    private BlockPos PlayerPos = new BlockPos();
 
     private WorldLoader loader = new WorldLoader();
 
@@ -55,8 +56,6 @@ public class World
                 for(int z=0; z<SIZE; z++){
                     var pos = (new BlockPos(x,y,z)-VIEW_DISTANCE_CHUNK)*Chunk.SIZE + CenterChunkPos;
                     Chunks[x,y,z] = loader.LoadChunk(pos);
-
-                    //Debug.Log($"LoadChunks X:{x},Y:{y},Z:{z} Pos:{pos}");
                 }
             }
         }
@@ -82,20 +81,10 @@ public class World
 
     private BlockPos PosToChunkPos(BlockPos pos)
     {
-        var vect = new Vector3Int();
-      /*  
-        if(pos.X < 0){
-            vect.x = 1;
-        }
+        return new BlockPos(RoundToChunkSize(pos.X), RoundToChunkSize(pos.Y), RoundToChunkSize(pos.Z));
+    }
 
-        if(pos.Y < 0){
-            vect.y = 1;
-        }
-
-        if(pos.Z < 0){
-            vect.z = 1;
-        }*/
-
-        return ((pos-vect*Chunk.SIZE)/Chunk.SIZE)*Chunk.SIZE;
+    private int RoundToChunkSize(int a){
+        return (int)Mathf.Floor((float)a/(float)Chunk.SIZE)*Chunk.SIZE;
     }
 }

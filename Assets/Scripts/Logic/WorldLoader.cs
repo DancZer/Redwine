@@ -36,7 +36,7 @@ public class WorldLoader
                 for(int y=0;y<Chunk.SIZE;y++){
                     Block block = Blocks.Air;
 
-                    if(chunk.Pos.Y + y < 0){
+                    if(chunk.Pos.Y + y <= baseLine){
                         block = Blocks.Dirt;
                     }
 
