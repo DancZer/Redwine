@@ -41,7 +41,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         for(int x=-1; x<Chunk.Size; x++){
             for(int z=-1; z<Chunk.Size; z++){
                 for(int y=-1; y<Chunk.Size; y++){
-                    BlockPos blockPos = new BlockPos(x, y, z);
+                    var blockPos = new Vector3Int(x, y, z);
 
                     var block = GetBlock(blockPos);
                     if(!block.IsSolid) continue;
@@ -139,7 +139,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         return mesh;
     }
 
-    private Block GetBlock(BlockPos pos){
+    private Block GetBlock(Vector3Int pos){
         var blockType = chunk.GetBlockState(pos);
 
         return Blocks.blocks[blockType];

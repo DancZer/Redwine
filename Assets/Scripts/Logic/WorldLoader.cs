@@ -12,7 +12,9 @@ public class WorldLoader
         noise.SetSeed((int)System.DateTime.Now.TimeOfDay.TotalSeconds);
     }
 
-    public Chunk LoadChunk (BlockPos pos){
+    public Chunk LoadChunk (Vector3Int pos){
+
+        //Debug.Log("WorldLoader.LoadChunks:"+pos);
 
         Chunk chunk;
 
@@ -25,18 +27,18 @@ public class WorldLoader
         return chunk;
     }
 
-    private Chunk GenerateChunk(BlockPos pos){
+    private Chunk GenerateChunk(Vector3Int pos){
         var chunk = new Chunk(pos);
 
         for(int x=-1; x<Config.CHUNK_SIZE+1; x++){
             for(int z=-1; z<Config.CHUNK_SIZE+1; z++){
 
-                var baseLine = GetBaseLandHeight(pos.X+x, pos.Z+z);
+                var baseLine = GetBaseLandHeight(pos.x+x, pos.z+z);
 
                 for(int y=-1; y<Config.CHUNK_SIZE+1; y++){
                     var block = BlockType.Air;
 
-                    if(chunk.Pos.Y + y <= baseLine){
+                    if(chunk.Pos.y + y <= baseLine){
                         block = BlockType.Dirt;
                     }
 

@@ -34,6 +34,20 @@ public class ChunkRendererCube : MonoBehaviour
         }
     }
 
+    private void OnDisable() {
+
+        if(cubes == null) return;
+
+        for(int x=0;x<Config.CHUNK_SIZE;x++){
+            for(int z=0;z<Config.CHUNK_SIZE;z++){
+                for(int y=0;y<Config.CHUNK_SIZE;y++){
+                    var cube = cubes[x,y,z];
+                    cube.SetActive(false);
+                }
+            }
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -54,7 +68,7 @@ public class ChunkRendererCube : MonoBehaviour
                     var cube = cubes[x,y,z];
                     cube.SetActive(false);
 
-                    var blockPos = new BlockPos(x,y,z);
+                    var blockPos = new Vector3Int(x,y,z);
 
                     var block = ShouldRenderCubeAt(blockPos);
                     //Debug.Log("block:"+block+" "+blockPos);
@@ -70,7 +84,7 @@ public class ChunkRendererCube : MonoBehaviour
         }
     }
     
-    private Block ShouldRenderCubeAt(BlockPos pos){
+    private Block ShouldRenderCubeAt(Vector3Int pos){
         var block = GetBlock(pos);
 
         if(block.IsAir || 
@@ -84,7 +98,7 @@ public class ChunkRendererCube : MonoBehaviour
         return block;
     }
 
-    private Block GetBlock(BlockPos pos){
+    private Block GetBlock(Vector3Int pos){
         var blockType = chunk.GetBlockState(pos);
 
         return Blocks.blocks[blockType];

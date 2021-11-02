@@ -6,19 +6,19 @@ public class Chunk
 {
     public const int Size = Config.CHUNK_SIZE+2;
     public string Name {get;}
-    public BlockPos Pos {get;}
+    public Vector3Int Pos {get;}
     private BlockType[,,] blockStates;
-    public Chunk(BlockPos pos)
+    public Chunk(Vector3Int pos)
     {
         Pos = pos;
-        Name=$"Chunk_{pos.X}_{pos.Y}_{pos.Z}";
+        Name=$"Chunk_{pos.x}_{pos.y}_{pos.z}";
         blockStates = new BlockType[Size, Size, Size];
     }
 
-    public BlockType GetBlockState(BlockPos pos)
+    public BlockType GetBlockState(Vector3Int pos)
     {
         //Debug.Log("GetBlockState:"+pos);
-        return GetBlockState(pos.X, pos.Y, pos.Z);
+        return GetBlockState(pos.x, pos.y, pos.z);
     }
 
     public BlockType GetBlockState(int x, int y, int z)
