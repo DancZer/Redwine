@@ -350,7 +350,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Player: {fileID: 963194229}
-  ChunkRendererPrefab: {fileID: 6240352670839091494, guid: 62747d59925c60a40b0c6531a829426b, type: 3}
+  ChunkRendererPrefab: {fileID: 4199728011505706268, guid: 4b187655ab8b2dc44873cd4bea4dadf3, type: 3}
 --- !u!4 &1819193296
 Transform:
   m_ObjectHideFlags: 0

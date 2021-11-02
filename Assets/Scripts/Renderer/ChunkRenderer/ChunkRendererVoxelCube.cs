@@ -5,12 +5,29 @@ using UnityEngine;
 public class ChunkRendererVoxelCube : MonoBehaviour
 {
     private ChunkRendererInterface chunkRenderer;
+    private MeshFilter meshFilter;
+    private MeshRenderer meshRenderer;
+    private MeshCollider meshCollider;
 
     private Chunk chunk;
+
+    private bool disabled;
 
     void Start()
     {
         chunkRenderer = GetComponent<ChunkRendererInterface>();
+        meshFilter = GetComponent<MeshFilter>();
+        meshRenderer = GetComponent<MeshRenderer>();
+        meshCollider = GetComponent<MeshCollider>();
+    }
+
+    private void OnDisable() {
+        if(meshRenderer != null){
+            meshRenderer.enabled = false;
+        }
+        if(meshCollider != null){
+            meshCollider.enabled = false;
+        }
     }
 
     // Update is called once per frame
@@ -19,6 +36,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         if(chunkRenderer.shouldRender){
             Render();
             chunkRenderer.shouldRender = false;
+            meshRenderer.enabled = meshCollider.enabled = true;
         }
     }
 
@@ -27,8 +45,8 @@ public class ChunkRendererVoxelCube : MonoBehaviour
 
         var mesh = BuildChunkMesh();
         
-        GetComponent<MeshFilter>().mesh = mesh;
-        GetComponent<MeshCollider>().sharedMesh = mesh;
+        meshFilter.mesh = mesh;
+        meshCollider.sharedMesh = mesh;
     }
     
     private Mesh BuildChunkMesh()
@@ -38,16 +56,16 @@ public class ChunkRendererVoxelCube : MonoBehaviour
 
         //Debug.Log("BuildChunkMesh:"+chunk.BlockPos);
         var numFaces = 0;
-        for(int x=-1; x<Chunk.Size; x++){
-            for(int z=-1; z<Chunk.Size; z++){
-                for(int y=-1; y<Chunk.Size; y++){
+        for(int x=0; x<Config.CHUNK_SIZE; x++){
+            for(int z=0; z<Config.CHUNK_SIZE; z++){
+                for(int y=0; y<Config.CHUNK_SIZE; y++){
                     var blockPos = new Vector3Int(x, y, z);
 
-                    var block = GetBlock(blockPos);
-                    if(!block.IsSolid) continue;
+                    var mainBlock = GetBlock(blockPos);
+                    if(!mainBlock.IsSolid) continue;
 
                     //Above
-                    block = GetBlock(blockPos.Above());
+                    var block = GetBlock(blockPos.Above());
                     if(!block.IsSolid){
                         verts.Add(new Vector3(0, 1, 0)+blockPos);
                         verts.Add(new Vector3(0, 1, 1)+blockPos);
@@ -55,7 +73,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
                         verts.Add(new Vector3(1, 1, 0)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(block.Top.GetUVs());
+                        uvs.AddRange(mainBlock.Top.GetUVs());
                     }
                     
                     //Below
@@ -67,7 +85,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
                         verts.Add(new Vector3(0, 0, 1)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(block.Bottom.GetUVs());
+                        uvs.AddRange(mainBlock.Bottom.GetUVs());
                     }
 
                     //South
@@ -79,7 +97,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
                         verts.Add(new Vector3(1, 0, 0)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(block.Side.GetUVs());
+                        uvs.AddRange(mainBlock.Side.GetUVs());
                     }
 
                     //East
@@ -91,7 +109,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
                         verts.Add(new Vector3(1, 0, 1)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(block.Side.GetUVs());
+                        uvs.AddRange(mainBlock.Side.GetUVs());
                     }
 
                     //North
@@ -103,7 +121,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
                         verts.Add(new Vector3(0, 0, 1)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(block.Side.GetUVs());
+                        uvs.AddRange(mainBlock.Side.GetUVs());
                     }
 
                     //West
@@ -115,7 +133,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
                         verts.Add(new Vector3(0, 0, 0)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(block.Side.GetUVs());
+                        uvs.AddRange(mainBlock.Side.GetUVs());
                     }
                 }
             }
