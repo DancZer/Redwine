@@ -28,19 +28,19 @@ public class WorldLoader
     private Chunk GenerateChunk(BlockPos pos){
         var chunk = new Chunk(pos);
 
-        for(int x=0;x<Chunk.SIZE;x++){
-            for(int z=0;z<Chunk.SIZE;z++){
+        for(int x=-1; x<Config.CHUNK_SIZE+1; x++){
+            for(int z=-1; z<Config.CHUNK_SIZE+1; z++){
 
                 var baseLine = GetBaseLandHeight(pos.X+x, pos.Z+z);
 
-                for(int y=0;y<Chunk.SIZE;y++){
-                    Block block = Blocks.Air;
+                for(int y=-1; y<Config.CHUNK_SIZE+1; y++){
+                    var block = BlockType.Air;
 
                     if(chunk.Pos.Y + y <= baseLine){
-                        block = Blocks.Dirt;
+                        block = BlockType.Dirt;
                     }
 
-                    chunk.SetBlockState(new BlockPos(x, y, z), block.Default());
+                    chunk.SetBlockState(x, y, z, block);
                 }
             }
         }
@@ -56,7 +56,7 @@ public class WorldLoader
         float heightMap = simplex1 + simplex2;
 
         //add the 2d noise to the middle of the terrain chunk
-        float baseLandHeight = Chunk.SIZE * .5f + heightMap;
+        float baseLandHeight = Config.CHUNK_SIZE * .5f + heightMap;
 
         return baseLandHeight;
     }

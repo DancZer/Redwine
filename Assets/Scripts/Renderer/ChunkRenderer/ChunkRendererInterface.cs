@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class ChunkRendererInterface : MonoBehaviour
 {
-    public World World;
-    public Chunk Chunk;
+    public Chunk chunk;
+
+    public bool shouldRender;
 
     void Start()
     {

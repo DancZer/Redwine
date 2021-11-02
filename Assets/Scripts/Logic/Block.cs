@@ -5,25 +5,20 @@ using UnityEngine;
 public class Block
 {
     public bool IsAir {get;}
-
     public bool IsLiquid {get;}
-
     public bool IsSolid => !(IsAir || IsLiquid);
+    public Tile Top;
+    public Tile Side;
+    public Tile Bottom;
 
-    public BlockMaterial Material {get;}
-
-    public Block(bool air, bool liquid, BlockMaterial material)
+    public Block(bool air, bool liquid, Tile tile)
     {
         IsAir = air;
         IsLiquid = liquid;
-        Material = material;
-    }
-
-    public BlockState Default(){
-        return new BlockState(this);
+        Top = Side = Bottom = tile;
     }
 
     override public string ToString(){
-        return $"IsAir:{IsAir}, IsLiquid:{IsLiquid}, Material:{Material}";
+        return $"IsAir:{IsAir}, IsLiquid:{IsLiquid}, Top:{Top}, Side:{Side}, Bottom:{Bottom}";
     }
 }

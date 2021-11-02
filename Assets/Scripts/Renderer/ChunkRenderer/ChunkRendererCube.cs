@@ -6,60 +6,61 @@ public class ChunkRendererCube : MonoBehaviour
 {
     public Material Material;
 
-    private GameObject[,,] Cubes;
+    private ChunkRendererInterface chunkRenderer;
+
+    private Chunk chunk;
+
+    private GameObject[,,] cubes;
 
     void Start()
     {
-        if(Cubes == null){
-            Cubes = new GameObject[Chunk.SIZE, Chunk.SIZE, Chunk.SIZE];
-            for(int x=0;x<Chunk.SIZE;x++){
-                for(int z=0;z<Chunk.SIZE;z++){
-                    for(int y=0;y<Chunk.SIZE;y++){
-                        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        cube.SetActive(false);
-                        cube.transform.SetParent(this.transform);
-                        cube.transform.localScale = new Vector3(1,1,1);
-                        cube.transform.localPosition = new Vector3(x+0.5f,y+0.5f,z+0.5f);
-                        
-                        var renderer = cube.GetComponent<MeshRenderer>();
-                        renderer.material = Material;
-                        Cubes[x,y,z] = cube;
-                    }
+        chunkRenderer = GetComponent<ChunkRendererInterface>();
+
+        cubes = new GameObject[Config.CHUNK_SIZE, Config.CHUNK_SIZE, Config.CHUNK_SIZE];
+        for(int x=0;x<Config.CHUNK_SIZE;x++){
+            for(int z=0;z<Config.CHUNK_SIZE;z++){
+                for(int y=0;y<Config.CHUNK_SIZE;y++){
+                    var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.SetActive(false);
+                    cube.transform.SetParent(this.transform);
+                    cube.transform.localScale = new Vector3(1,1,1);
+                    cube.transform.localPosition = new Vector3(x+0.5f,y+0.5f,z+0.5f);
+                    
+                    var renderer = cube.GetComponent<MeshRenderer>();
+                    renderer.material = Material;
+                    cubes[x,y,z] = cube;
                 }
             }
         }
-
-        Render();
     }
 
     // Update is called once per frame
     void Update()
     {
-    }
-
-    void OnEnable() {
-        if(Cubes != null){
+        if(chunkRenderer.shouldRender){
             Render();
+            chunkRenderer.shouldRender = false;
         }
     }
 
     private void Render(){
-        var chunkRenderer = GetComponent<ChunkRendererInterface>();
-        
-        var chunk = chunkRenderer.Chunk;
+        chunk = chunkRenderer.chunk;
 
-        for(int x=0;x<Chunk.SIZE;x++){
-            for(int z=0;z<Chunk.SIZE;z++){
-                for(int y=0;y<Chunk.SIZE;y++){
-                    var cube = Cubes[x,y,z];
+        //Debug.Log("Render:"+chunk);
+
+        for(int x=0;x<Config.CHUNK_SIZE;x++){
+            for(int z=0;z<Config.CHUNK_SIZE;z++){
+                for(int y=0;y<Config.CHUNK_SIZE;y++){
+                    var cube = cubes[x,y,z];
                     cube.SetActive(false);
 
-                    var blockPos = chunk.Pos+new BlockPos(x,y,z);
+                    var blockPos = new BlockPos(x,y,z);
 
-                    var blockState = ShouldRenderCubeAt(blockPos);
-                    if(blockState == null) continue;
+                    var block = ShouldRenderCubeAt(blockPos);
+                    //Debug.Log("block:"+block+" "+blockPos);
+                    if(block == null) continue;
                     
-                    var blockMat = blockState.Block.Material;
+                    var blockMat = block.Side;
                     var renderer = cube.GetComponent<MeshRenderer>();
                     renderer.material.SetTextureOffset("_MainTex", blockMat.GetOffset());
                     renderer.material.SetTextureScale("_MainTex", blockMat.GetScale());
@@ -67,25 +68,29 @@ public class ChunkRendererCube : MonoBehaviour
                 }
             }
         }
-        
+    }
+    
+    private Block ShouldRenderCubeAt(BlockPos pos){
+        var block = GetBlock(pos);
+
+        if(block.IsAir || 
+            IsEnabledSolid(GetBlock(pos.Below())) &&
+            IsEnabledSolid(GetBlock(pos.Above())) &&
+            IsEnabledSolid(GetBlock(pos.North())) &&
+            IsEnabledSolid(GetBlock(pos.South())) &&
+            IsEnabledSolid(GetBlock(pos.West())) &&
+            IsEnabledSolid(GetBlock(pos.East()))) return null; 
+
+        return block;
     }
 
-    private BlockState ShouldRenderCubeAt(BlockPos pos){
-        var blockState = World.Instance().GetBlockStates(pos);
+    private Block GetBlock(BlockPos pos){
+        var blockType = chunk.GetBlockState(pos);
 
-        if(!blockState.Enabled ||
-            blockState.Block.IsAir || 
-            IsEnabledSolid(World.Instance().GetBlockStates(pos.Below())) &&
-            IsEnabledSolid(World.Instance().GetBlockStates(pos.Above())) &&
-            IsEnabledSolid(World.Instance().GetBlockStates(pos.North())) &&
-            IsEnabledSolid(World.Instance().GetBlockStates(pos.South())) &&
-            IsEnabledSolid(World.Instance().GetBlockStates(pos.West())) &&
-            IsEnabledSolid(World.Instance().GetBlockStates(pos.East()))) return null; 
-
-        return blockState;
+        return Blocks.blocks[blockType];
     }
 
-    private bool IsEnabledSolid(BlockState blockState){
-        return blockState.Enabled && blockState.Block.IsSolid;
+    private bool IsEnabledSolid(Block block){
+        return block.IsSolid;
     }
 }

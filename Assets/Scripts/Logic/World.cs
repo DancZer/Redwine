@@ -5,13 +5,12 @@ using UnityEngine;
 //This is more like the player area, not the whole world. functionality should be split
 public class World
 {
-    public const int VIEW_DISTANCE_CHUNK = Config.WORLD_CHUNK_VIEW_DISTANCE; //2
-    public const int SIZE = 1+VIEW_DISTANCE_CHUNK*2; //3
+    public const int Size = 1+Config.WORLD_CHUNK_VIEW_DISTANCE*2;
 
-    public Chunk[,,] Chunks = new Chunk[SIZE, SIZE, SIZE];
+    public Chunk[,,] Chunks = new Chunk[Size, Size, Size];
 
-    private BlockPos CenterChunkPos = new BlockPos();
-    private BlockPos PlayerPos = new BlockPos();
+    private BlockPos CenterChunkPos;
+    private BlockPos PlayerPos;
 
     private WorldLoader loader = new WorldLoader();
 
@@ -36,7 +35,7 @@ public class World
     {
         var chunkPos = PosToChunkPos(playerPos);
 
-        if(Vector3.Distance(chunkPos.Vect, CenterChunkPos.Vect) >= Chunk.SIZE){
+        if(Vector3.Distance(chunkPos.Vect, CenterChunkPos.Vect) >= Config.CHUNK_SIZE){
             CenterChunkPos = chunkPos;
 
             //Debug.Log("CenterChunkPos: "+CenterChunkPos);
@@ -51,10 +50,10 @@ public class World
 
     public void LoadChunks()
     {        
-        for(int x=0; x<SIZE; x++){
-            for(int y=0; y<SIZE; y++){
-                for(int z=0; z<SIZE; z++){
-                    var pos = (new BlockPos(x,y,z)-VIEW_DISTANCE_CHUNK)*Chunk.SIZE + CenterChunkPos;
+        for(int x=0; x<Size; x++){
+            for(int y=0; y<Size; y++){
+                for(int z=0; z<Size; z++){
+                    var pos = (new BlockPos(x,y,z)-Config.WORLD_CHUNK_VIEW_DISTANCE)*Config.CHUNK_SIZE + CenterChunkPos;
                     Chunks[x,y,z] = loader.LoadChunk(pos);
                 }
             }
@@ -62,20 +61,20 @@ public class World
     }
 
 
-    public BlockState GetBlockStates(BlockPos pos)
+    public BlockType GetBlockStates(BlockPos pos)
     {
         var chunkPos = PosToChunkPos(pos);
-        var chunkIdx = (chunkPos - CenterChunkPos)/Chunk.SIZE + VIEW_DISTANCE_CHUNK;
+        var chunkIdx = (chunkPos - CenterChunkPos)/Config.CHUNK_SIZE + Config.WORLD_CHUNK_VIEW_DISTANCE;
 
         var blockPos = (chunkPos-pos).Abs();
 
         //Debug.Log("World GetBlockStates:"+pos+ " chunkPos:"+chunkPos+" CenterChunkPos: "+CenterChunkPos+" chunkIdx:"+chunkIdx + " relBlockPos: "+blockPos);
 
-        if(BlockPos.InRange(0, SIZE, chunkIdx)){
-            return Chunks[chunkIdx.X, chunkIdx.Y, chunkIdx.Z].GetBlockStateRelative(blockPos);
+        if(BlockPos.InRange(0, Size, chunkIdx)){
+            return Chunks[chunkIdx.X, chunkIdx.Y, chunkIdx.Z].GetBlockState(blockPos);
         }else{
             //Debug.Log("Over visibility:"+pos);
-            return Blocks.Air.Default();
+            return BlockType.Air;
         }
     }
 
@@ -85,6 +84,6 @@ public class World
     }
 
     private int RoundToChunkSize(int a){
-        return (int)Mathf.Floor((float)a/(float)Chunk.SIZE)*Chunk.SIZE;
+        return (int)Mathf.Floor((float)a/(float)Config.CHUNK_SIZE)*Config.CHUNK_SIZE;
     }
 }

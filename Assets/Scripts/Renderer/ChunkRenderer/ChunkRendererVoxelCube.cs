@@ -4,104 +4,118 @@ using UnityEngine;
 
 public class ChunkRendererVoxelCube : MonoBehaviour
 {
-    // Start is called before the first frame update
+    private ChunkRendererInterface chunkRenderer;
+
+    private Chunk chunk;
+
     void Start()
     {
-        Render();
+        chunkRenderer = GetComponent<ChunkRendererInterface>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if(chunkRenderer.shouldRender){
+            Render();
+            chunkRenderer.shouldRender = false;
+        }
     }
 
     private void Render(){
-        var chunkRenderer = GetComponent<ChunkRendererInterface>();
-        var mesh = BuildChunkMesh(chunkRenderer.Chunk, chunkRenderer.World);
+        chunk = chunkRenderer.chunk;
+
+        var mesh = BuildChunkMesh();
         
         GetComponent<MeshFilter>().mesh = mesh;
         GetComponent<MeshCollider>().sharedMesh = mesh;
     }
     
-    private Mesh BuildChunkMesh(Chunk chunk, World world)
+    private Mesh BuildChunkMesh()
     {
         var verts = new List<Vector3>();
         var uvs = new  List<Vector2>();
 
         //Debug.Log("BuildChunkMesh:"+chunk.BlockPos);
         var numFaces = 0;
-        for(int x=0;x<Chunk.SIZE;x++){
-            for(int z=0;z<Chunk.SIZE;z++){
-                for(int y=0;y<Chunk.SIZE;y++){
-                    BlockPos blockPos = chunk.Pos+new BlockPos(x, y, z);
+        for(int x=-1; x<Chunk.Size; x++){
+            for(int z=-1; z<Chunk.Size; z++){
+                for(int y=-1; y<Chunk.Size; y++){
+                    BlockPos blockPos = new BlockPos(x, y, z);
 
-                    BlockState blockState = world.GetBlockStates(blockPos);
-                    if(!blockState.Block.IsSolid) continue;
+                    var block = GetBlock(blockPos);
+                    if(!block.IsSolid) continue;
 
                     //Above
-                    if(!world.GetBlockStates(blockPos.Above()).Block.IsSolid){
+                    block = GetBlock(blockPos.Above());
+                    if(!block.IsSolid){
                         verts.Add(new Vector3(0, 1, 0)+blockPos);
                         verts.Add(new Vector3(0, 1, 1)+blockPos);
                         verts.Add(new Vector3(1, 1, 1)+blockPos);
                         verts.Add(new Vector3(1, 1, 0)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(blockState.Block.Material.GetUVs());
+                        uvs.AddRange(block.Top.GetUVs());
                     }
                     
                     //Below
-                    if(!world.GetBlockStates(blockPos.Below()).Block.IsSolid){
+                    block = GetBlock(blockPos.Below());
+                    if(!block.IsSolid){
                         verts.Add(new Vector3(0, 0, 0)+blockPos);
                         verts.Add(new Vector3(1, 0, 0)+blockPos);
                         verts.Add(new Vector3(1, 0, 1)+blockPos);
                         verts.Add(new Vector3(0, 0, 1)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(blockState.Block.Material.GetUVs());
+                        uvs.AddRange(block.Bottom.GetUVs());
                     }
 
                     //South
-                    if(!world.GetBlockStates(blockPos.South()).Block.IsSolid){
+                    block = GetBlock(blockPos.South());
+                    if(!block.IsSolid){
                         verts.Add(new Vector3(0, 0, 0)+blockPos);
                         verts.Add(new Vector3(0, 1, 0)+blockPos);
                         verts.Add(new Vector3(1, 1, 0)+blockPos);
                         verts.Add(new Vector3(1, 0, 0)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(blockState.Block.Material.GetUVs());
+                        uvs.AddRange(block.Side.GetUVs());
                     }
 
                     //East
-                    if(!world.GetBlockStates(blockPos.East()).Block.IsSolid){
+                    block = GetBlock(blockPos.East());
+                    if(!block.IsSolid){
                         verts.Add(new Vector3(1, 0, 0)+blockPos);
                         verts.Add(new Vector3(1, 1, 0)+blockPos);
                         verts.Add(new Vector3(1, 1, 1)+blockPos);
                         verts.Add(new Vector3(1, 0, 1)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(blockState.Block.Material.GetUVs());
+                        uvs.AddRange(block.Side.GetUVs());
                     }
 
                     //North
-                    if(!world.GetBlockStates(blockPos.North()).Block.IsSolid){
+                    block = GetBlock(blockPos.North());
+                    if(!block.IsSolid){
                         verts.Add(new Vector3(1, 0, 1)+blockPos);
                         verts.Add(new Vector3(1, 1, 1)+blockPos);
                         verts.Add(new Vector3(0, 1, 1)+blockPos);
                         verts.Add(new Vector3(0, 0, 1)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(blockState.Block.Material.GetUVs());
+                        uvs.AddRange(block.Side.GetUVs());
                     }
 
                     //West
-                    if(!world.GetBlockStates(blockPos.West()).Block.IsSolid){
+                    block = GetBlock(blockPos.West());
+                    if(!block.IsSolid){
                         verts.Add(new Vector3(0, 0, 1)+blockPos);
                         verts.Add(new Vector3(0, 1, 1)+blockPos);
                         verts.Add(new Vector3(0, 1, 0)+blockPos);
                         verts.Add(new Vector3(0, 0, 0)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(blockState.Block.Material.GetUVs());
+                        uvs.AddRange(block.Side.GetUVs());
                     }
                 }
             }
@@ -123,5 +137,11 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         mesh.RecalculateNormals();
 
         return mesh;
+    }
+
+    private Block GetBlock(BlockPos pos){
+        var blockType = chunk.GetBlockState(pos);
+
+        return Blocks.blocks[blockType];
     }
 }

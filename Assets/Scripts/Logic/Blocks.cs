@@ -4,7 +4,14 @@ using UnityEngine;
 
 public class Blocks
 {
-    public static Block Air = new Block(true, false, null);
-    public static Block Dirt = new Block(false, false, BlockMaterials.Dirt);
-    public static Block Water = new Block(false, true, BlockMaterials.WaterTop);
+    public static Dictionary<BlockType, Block> blocks = new Dictionary<BlockType, Block>()
+    {
+        {BlockType.Air, new Block(true, false, null)},
+        {BlockType.Dirt, new Block(false, false, new Tile(2,15,"Dirt"))},
+        {BlockType.Water, new Block(false, true, new Tile(14,3,"Water"))},
+    };
+}
+public enum BlockType
+{
+    Air, Dirt, Water
 }

@@ -2,35 +2,39 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BlockPos
+public struct BlockPos
 {
-    public int X {get;}
-
-    public int Y {get;}
-
-    public int Z {get;}
-
-    public Vector3Int Vect {
+    public int X {
         get
         {
-            return new Vector3Int(this.X, Y, Z);
+            return Vect.x;
         }
-    } 
+    }
 
-    public BlockPos(){}
+    public int Y {
+        get
+        {
+            return Vect.y;
+        }
+    }
+
+    public int Z {
+        get
+        {
+            return Vect.z;
+        }
+    }
+
+    public Vector3Int Vect { get;}
 
     public BlockPos(int x, int y, int z)
     {
-        X = x;
-        Y = y;
-        Z = z;
+        Vect = new Vector3Int(x,y,z);
     }
 
     public BlockPos(Vector3Int pos)
     {
-        X = pos.x;
-        Y = pos.y;
-        Z = pos.z;
+        Vect = pos;
     }
 
     public BlockPos Above(){
@@ -139,5 +143,15 @@ public class BlockPos
 
     public static bool InRange(int from, int to, BlockPos a){
         return from <= a.X && a.X < to && from <= a.Y && a.Y < to && from <= a.Z && a.Z < to;
+    }
+
+    public override bool Equals(object obj)
+    {
+        return Vect.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Vect.GetHashCode();
     }
 }
