@@ -19,6 +19,10 @@ public class World
         LoadChunks();
     }
 
+    public Vector3 GetStartPos(){
+        return new Vector3(0, loader.GetBaseLandHeight(0,0)+1, 0);
+    }
+
     public bool Update(Vector3Int playerPos)
     {
         var chunkPos = PosToChunkPos(playerPos);

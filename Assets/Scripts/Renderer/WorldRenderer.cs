@@ -9,17 +9,17 @@ public class WorldRenderer : MonoBehaviour
 
     private Dictionary<Vector3Int, GameObject> chunkRenderers;
 
-    public MonoBehaviour Player;
+    public Component Player;
     public GameObject ChunkRendererPrefab;
 
     // Start is called before the first frame update
     void Start()
     {        
-        Player.transform.position = new Vector3();
-
         chunkRenderers = new Dictionary<Vector3Int, GameObject>();
 
         world.Start();
+
+        Player.transform.position = world.GetStartPos();
 
         CreateRenderers();
 
