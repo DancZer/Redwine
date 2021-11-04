@@ -4,17 +4,7 @@ using UnityEngine;
 
 public class ChunkRendererInterface : MonoBehaviour
 {
-    public Chunk chunk;
+    public IChunkInterface chunk;
 
     public bool shouldRender;
-
-    void Start()
-    {
-        //Nothing to do
-    }
-
-    void Update()
-    {
-        //Nothing to do
-    }
 }

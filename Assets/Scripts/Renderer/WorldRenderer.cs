@@ -5,14 +5,12 @@ using System.Linq;
 
 public class WorldRenderer : MonoBehaviour
 {
-    private const int ViewDistanceBlockCount = Config.ViewDistanceChunkCount*Config.ChunkSize;
     private readonly World world = new World();
     private readonly Dictionary<Vector3Int, GameObject> activeChunkRenderers = new Dictionary<Vector3Int, GameObject>();
     private readonly Queue<GameObject> notActiveChunkRenderers = new Queue<GameObject>();
     private readonly List<Vector3Int> renderChunkPosQueue = new List<Vector3Int>();
     private Vector3Int centerChunkPos;
-
-    public Component Player;
+    public Transform PlayerPos;
     public GameObject ChunkRendererPrefab;
 
 
@@ -30,7 +28,7 @@ public class WorldRenderer : MonoBehaviour
 
         PreLoadPlayerLevel();
 
-        Player.transform.position = startPos;
+        PlayerPos.position = startPos;
 
         RenderChunks();
     }
@@ -54,7 +52,7 @@ public class WorldRenderer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        var playerPos = Vector3Int.FloorToInt(Player.transform.position);
+        var playerPos = Vector3Int.FloorToInt(PlayerPos.position);
 
         if(UpdateCenterPos(playerPos)){
             //Debug.Log("CenterChunkPos changed:"+playerPos);
@@ -77,8 +75,8 @@ public class WorldRenderer : MonoBehaviour
 
     private Vector3Int[] GetViewDistanceBoundary(){
         return new Vector3Int[]{
-            centerChunkPos - new Vector3Int(ViewDistanceBlockCount, ViewDistanceBlockCount, ViewDistanceBlockCount),
-            centerChunkPos + new Vector3Int(ViewDistanceBlockCount, ViewDistanceBlockCount, ViewDistanceBlockCount) + new Vector3Int(Config.ChunkSize, Config.ChunkSize, Config.ChunkSize)
+            centerChunkPos - new Vector3Int(Config.ViewDistanceBlockCount, Config.ViewDistanceBlockCount, Config.ViewDistanceBlockCount),
+            centerChunkPos + new Vector3Int(Config.ViewDistanceBlockCount, Config.ViewDistanceBlockCount, Config.ViewDistanceBlockCount) + new Vector3Int(Config.ChunkSize, Config.ChunkSize, Config.ChunkSize)
         };
     }
 
@@ -148,7 +146,7 @@ public class WorldRenderer : MonoBehaviour
         while(renderChunkPosQueue.Count > 0)
         {
             var pos = renderChunkPosQueue.OrderBy(p => Vector3Int.Distance(p, centerChunkPos)).First();
-            Debug.Log("DelayBuildChunks:"+pos);
+            //Debug.Log("DelayBuildChunks:"+pos);
             renderChunkPosQueue.Remove(pos);
             LoadAndRenderNewChunk(pos);
 

@@ -10,11 +10,9 @@ public class World
 
     private WorldGenerator generator = new WorldGenerator();
 
-    private Queue<Vector3Int> chunksLoadQueue = new Queue<Vector3Int>();
-
     public void Init()
     {
-        generator.Init((int)System.DateTime.Now.TimeOfDay.TotalSeconds);
+        generator.Init(Config.RandomSeed);
     }
 
     public Vector3Int GetStartPos()
@@ -28,7 +26,7 @@ public class World
 
         Chunk chunk;
         if(!chunks.TryGetValue(chunkPos, out chunk)){
-            chunk = generator.GenerateChunk(chunkPos);
+            chunk = generator.Generate(chunkPos);
             chunks.Add(chunkPos, chunk);
         }
         return chunk;

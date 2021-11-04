@@ -10,7 +10,7 @@ public class WorldGenerator
         noise.SetSeed(seed);
     }
 
-    public Chunk GenerateChunk(Vector3Int pos){
+    public Chunk Generate(Vector3Int pos){
         var chunk = new Chunk(pos.ToChunkAligned());
 
         for(int x=-1; x<Config.ChunkSize+1; x++){
@@ -21,11 +21,13 @@ public class WorldGenerator
                 for(int y=-1; y<Config.ChunkSize+1; y++){
                     var block = BlockType.Air;
 
-                    if(chunk.Pos.y + y <= baseLine){
+                    if(chunk.Pos.y + y == baseLine){
+                        block = BlockType.DirtGrass;
+                    }else if(chunk.Pos.y + y < baseLine){
                         block = BlockType.Dirt;
                     }
 
-                    chunk.SetBlockState(x, y, z, block);
+                    chunk.SetBlockType(new Vector3Int(x, y, z), block);
                 }
             }
         }
@@ -33,7 +35,7 @@ public class WorldGenerator
         return chunk;
     }
 
-    public float GetBaseLandHeight(int x, int z){
+    public int GetBaseLandHeight(int x, int z){
         //print(noise.GetSimplex(x, z));
         float simplex1 = noise.GetSimplex(x*.8f, z*.8f)*10;
         float simplex2 = noise.GetSimplex(x * 3f, z * 3f) * 10*(noise.GetSimplex(x*.3f, z*.3f)+.5f);
@@ -43,6 +45,6 @@ public class WorldGenerator
         //add the 2d noise to the middle of the terrain chunk
         float baseLandHeight = Config.ChunkSize * .5f + heightMap;
 
-        return baseLandHeight;
+        return Mathf.FloorToInt(baseLandHeight);
     }
 }

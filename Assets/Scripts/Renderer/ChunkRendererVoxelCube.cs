@@ -8,9 +8,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
     private MeshCollider meshCollider;
-
-    private Chunk chunk;
-
+    private IChunkInterface chunk;
     private bool disabled;
 
     void Start()
@@ -58,9 +56,10 @@ public class ChunkRendererVoxelCube : MonoBehaviour
 
         //Debug.Log("BuildChunkMesh:"+chunk.BlockPos);
         var numFaces = 0;
-        for(int x=0; x<Config.ChunkSize; x++){
-            for(int z=0; z<Config.ChunkSize; z++){
-                for(int y=0; y<Config.ChunkSize; y++){
+        var chunkSize = chunk.Size;
+        for(int x=0; x<chunkSize.x; x++){
+            for(int z=0; z<chunkSize.z; z++){
+                for(int y=0; y<chunkSize.y; y++){
                     var blockPos = new Vector3Int(x, y, z);
 
                     var mainBlock = GetBlock(blockPos);
@@ -99,7 +98,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
                         verts.Add(new Vector3(1, 0, 0)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(mainBlock.Side.GetUVs());
+                        uvs.AddRange(mainBlock.Front.GetUVs());
                     }
 
                     //East
@@ -123,7 +122,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
                         verts.Add(new Vector3(0, 0, 1)+blockPos);
                         numFaces++;
 
-                        uvs.AddRange(mainBlock.Side.GetUVs());
+                        uvs.AddRange(mainBlock.Front.GetUVs());
                     }
 
                     //West
@@ -160,7 +159,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
     }
 
     private Block GetBlock(Vector3Int pos){
-        var blockType = chunk.GetBlockState(pos);
+        var blockType = chunk.GetBlockType(pos);
 
         return Blocks.blocks[blockType];
     }

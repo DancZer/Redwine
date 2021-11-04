@@ -2,32 +2,34 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Chunk
+public class Chunk : IChunkInterface
 {
-    public const int Size = Config.ChunkSize+2;
+    private const int InnerSize = Config.ChunkSize+2;
+    private BlockType[,,] blockStates;
     public string Name {get;}
     public Vector3Int Pos {get;}
-    private BlockType[,,] blockStates;
+    public Vector3Int Size {
+        get
+        {
+            return new Vector3Int(Config.ChunkSize, Config.ChunkSize, Config.ChunkSize);
+        }
+    }
+    
     public Chunk(Vector3Int pos)
     {
         Pos = pos;
         Name=$"Chunk_{pos.x}_{pos.y}_{pos.z}";
-        blockStates = new BlockType[Size, Size, Size];
+        blockStates = new BlockType[InnerSize, InnerSize, InnerSize];
     }
 
-    public BlockType GetBlockState(Vector3Int pos)
+    public BlockType GetBlockType(Vector3Int pos)
     {
-        //Debug.Log("GetBlockState:"+pos);
-        return GetBlockState(pos.x, pos.y, pos.z);
+        return blockStates[pos.x+1, pos.y+1, pos.z+1];
     }
 
-    public BlockType GetBlockState(int x, int y, int z)
+    public void SetBlockType(Vector3Int pos, BlockType type)
     {
-        return blockStates[x+1, y+1, z+1];
-    }
-
-    public void SetBlockState(int x, int y, int z, BlockType type){
-        blockStates[x+1, y+1, z+1] = type;
+        blockStates[pos.x+1, pos.y+1, pos.z+1] = type;
     }
 
     public override string ToString()
