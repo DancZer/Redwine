@@ -14,6 +14,7 @@ public class Chunk : IChunkInterface
             return new Vector3Int(Config.ChunkSize, Config.ChunkSize, Config.ChunkSize);
         }
     }
+    public float Opacity {get;} = 1;
     
     public Chunk(Vector3Int pos)
     {

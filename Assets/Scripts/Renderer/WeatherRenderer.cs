@@ -22,7 +22,7 @@ public class WeatherRenderer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        weather.Update(PlayerPos.position, Config.ViewDistanceBlockCount);
+        weather.Update(PlayerPos.position, Config.CloudViewDistanceBlockCount);
 
         RenderClouds();
     }
@@ -35,7 +35,7 @@ public class WeatherRenderer : MonoBehaviour
         
         renderCloudQueue.Clear();
 
-        foreach (var cloud in weather.GetVisibleClouds(PlayerPos.position, Config.ViewDistanceBlockCount))
+        foreach (var cloud in weather.GetVisibleClouds(PlayerPos.position, Config.CloudViewDistanceBlockCount))
         {
             GameObject obj;
             if(activeCloudRenderers.TryGetValue(cloud, out obj)){
@@ -82,7 +82,6 @@ public class WeatherRenderer : MonoBehaviour
         if(notActiveCloudRenderers.Count == 0){
             obj = Instantiate(ChunkRendererPrefab, new Vector3(), Quaternion.identity, transform);       
             obj.SetActive(false);
-            obj.name = "cloud_"+activeCloudRenderers.Count;
         }else{
             obj = notActiveCloudRenderers.Dequeue();
         }
@@ -91,6 +90,7 @@ public class WeatherRenderer : MonoBehaviour
         renderer.chunk = cloud;
         renderer.shouldRender = true;
 
+        obj.name = cloud.Name;
         obj.transform.position = cloud.Pos;
         obj.SetActive(true);
 

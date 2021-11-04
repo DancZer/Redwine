@@ -4,25 +4,45 @@ using UnityEngine;
 
 public class Cloud : IChunkInterface
 {
+    private const float MaxOpacity = 0.7f;
+    private const float PasePercentage = 0.1f;
     private BlockType[,,] blockStates;
     public Vector3 Pos;
-    public Vector3 Speed {get;}
     public Vector3Int Size {get;}
-    private float createdTime {get;}
-    public float LifeTime {get;}
+    public float AgeTime {get; private set;}
+    private float lifeTime;
+    private Vector3 velocity;
+    public string Name {get;}
 
-    public Cloud(Vector3 pos,  Vector3Int size, Vector3 speed, float createdTime, float lifeTime){
-        Pos = pos;
-        Size = size;
-        Speed = speed;
-        LifeTime = lifeTime;
-        this.createdTime = createdTime;
+    public float Opacity {
+        get{
+            var phaseTime = lifeTime*PasePercentage;
 
-        blockStates = new BlockType[size.x, size.y, size.z];
+            if(AgeTime<phaseTime){
+                return MaxOpacity*AgeTime/phaseTime;
+            }else if(AgeTime<lifeTime-phaseTime){
+                return MaxOpacity;
+            }else{
+                var remaining = Mathf.Min(AgeTime, lifeTime)-lifeTime;
+
+                return MaxOpacity*remaining/phaseTime;
+            }
+        }
     }
 
-    public float ElapsedSince(float time){
-        return time-createdTime;
+    public Cloud(Vector3 pos,  Vector3Int size, Vector3 vel, float life){
+        Pos = pos;
+        Size = size;
+        velocity = vel;
+        lifeTime = life;
+        blockStates = new BlockType[size.x, size.y, size.z];
+
+        Name = "cloud_"+size+"_"+life;
+    }
+
+    public void Update(){
+        AgeTime += Time.deltaTime;
+        Pos += velocity*Time.deltaTime;
     }
 
     public BlockType GetBlockType(Vector3Int pos)

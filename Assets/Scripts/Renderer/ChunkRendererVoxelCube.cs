@@ -17,6 +17,11 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
         meshCollider = GetComponent<MeshCollider>();
+                
+        var color = meshRenderer.material.color;
+        color.a = 0;
+
+        meshRenderer.material.SetColor("_Color", color);
 
         Render();
     }
@@ -38,6 +43,11 @@ public class ChunkRendererVoxelCube : MonoBehaviour
             chunkRenderer.shouldRender = false;
             meshRenderer.enabled = meshCollider.enabled = true;
         }
+
+        var color = meshRenderer.material.color;
+        color.a = chunkRenderer.chunk.Opacity;
+
+        meshRenderer.material.SetColor("_Color", color);
     }
 
     private void Render(){

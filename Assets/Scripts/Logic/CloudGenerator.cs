@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class CloudGenerator
 {
-    private FastNoise noise = new FastNoise();
+    private readonly FastNoise noise = new FastNoise();
+    private int baseHeight;
 
     public void Init(int seed, int height){
         noise.SetSeed(seed);
 
         Random.InitState(seed);
+
+        baseHeight = height;
     }
 
-    public Cloud Generate(Vector3 pos, Vector3 dir){
-        var size = new Vector3Int(Random.Range(5,10),2, Random.Range(5,10));
+    public Cloud Generate(Vector3 pos, Vector3Int size, Vector3 velocity, float life){
 
-        var velocity = dir * Random.Range(1,5);
-
-        var cloud = new Cloud(pos, size, velocity, Time.timeSinceLevelLoad, Random.Range(60, 600));
+        var cloud = new Cloud(pos, size, velocity, life);
 
         for (int x = 0; x < size.x; x++)
         {

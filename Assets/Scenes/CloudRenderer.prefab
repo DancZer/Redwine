@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7083888080581491055}
   - component: {fileID: 5859599264977828342}
   m_Layer: 0
-  m_Name: CubeVoxelRenderer
+  m_Name: CloudRenderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26af707cc738c594f93da2f0254de342, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  shouldRender: 0
 --- !u!33 &2930460171273912479
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -88,7 +89,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c7b78ef704dc2a742beae1dbe21d2978, type: 2}
+  - {fileID: 2100000, guid: 50d9a29ed4c97024da55843b2c000d0f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
