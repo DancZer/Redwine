@@ -16,10 +16,10 @@ public class ChunkRendererCube : MonoBehaviour
     {
         chunkRenderer = GetComponent<ChunkRendererInterface>();
 
-        cubes = new GameObject[Config.CHUNK_SIZE, Config.CHUNK_SIZE, Config.CHUNK_SIZE];
-        for(int x=0;x<Config.CHUNK_SIZE;x++){
-            for(int z=0;z<Config.CHUNK_SIZE;z++){
-                for(int y=0;y<Config.CHUNK_SIZE;y++){
+        cubes = new GameObject[Config.ChunkSize, Config.ChunkSize, Config.ChunkSize];
+        for(int x=0;x<Config.ChunkSize;x++){
+            for(int z=0;z<Config.ChunkSize;z++){
+                for(int y=0;y<Config.ChunkSize;y++){
                     var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.SetActive(false);
                     cube.transform.SetParent(this.transform);
@@ -38,9 +38,9 @@ public class ChunkRendererCube : MonoBehaviour
 
         if(cubes == null) return;
 
-        for(int x=0;x<Config.CHUNK_SIZE;x++){
-            for(int z=0;z<Config.CHUNK_SIZE;z++){
-                for(int y=0;y<Config.CHUNK_SIZE;y++){
+        for(int x=0;x<Config.ChunkSize;x++){
+            for(int z=0;z<Config.ChunkSize;z++){
+                for(int y=0;y<Config.ChunkSize;y++){
                     var cube = cubes[x,y,z];
                     cube.SetActive(false);
                 }
@@ -62,9 +62,9 @@ public class ChunkRendererCube : MonoBehaviour
 
         //Debug.Log("Render:"+chunk);
 
-        for(int x=0;x<Config.CHUNK_SIZE;x++){
-            for(int z=0;z<Config.CHUNK_SIZE;z++){
-                for(int y=0;y<Config.CHUNK_SIZE;y++){
+        for(int x=0;x<Config.ChunkSize;x++){
+            for(int z=0;z<Config.ChunkSize;z++){
+                for(int y=0;y<Config.ChunkSize;y++){
                     var cube = cubes[x,y,z];
                     cube.SetActive(false);
 

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Chunk
 {
-    public const int Size = Config.CHUNK_SIZE+2;
+    public const int Size = Config.ChunkSize+2;
     public string Name {get;}
     public Vector3Int Pos {get;}
     private BlockType[,,] blockStates;

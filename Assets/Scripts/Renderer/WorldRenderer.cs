@@ -5,36 +5,47 @@ using System.Linq;
 
 public class WorldRenderer : MonoBehaviour
 {
-    private World world = new World();
-
-    private Dictionary<Vector3Int, GameObject> chunkRenderers;
+    private const int ViewDistanceBlockCount = Config.ViewDistanceChunkCount*Config.ChunkSize;
+    private readonly World world = new World();
+    private readonly Dictionary<Vector3Int, GameObject> activeChunkRenderers = new Dictionary<Vector3Int, GameObject>();
+    private readonly Queue<GameObject> notActiveChunkRenderers = new Queue<GameObject>();
+    private readonly List<Vector3Int> renderChunkPosQueue = new List<Vector3Int>();
+    private Vector3Int centerChunkPos;
 
     public Component Player;
     public GameObject ChunkRendererPrefab;
 
+
     // Start is called before the first frame update
     void Start()
     {        
-        chunkRenderers = new Dictionary<Vector3Int, GameObject>();
+        world.Init();
 
-        world.Start();
+        var startPos = world.GetStartPos() + new Vector3(0.5f, 0, 0.5f);
+        
+        //Debug.Log("Start Player startPos:"+startPos);
 
-        Player.transform.position = world.GetStartPos();
+        centerChunkPos = Vector3Int.CeilToInt(startPos).ToChunkAligned();
+        //Debug.Log("Start centerChunkPos:"+centerChunkPos);
 
-        CreateRenderers();
+        PreLoadPlayerLevel();
 
-        Render();
+        Player.transform.position = startPos;
+
+        RenderChunks();
     }
-    private void CreateRenderers()
-    {
-        for(int x=0;x<World.Size;x++){
-            for(int z=0;z<World.Size;z++){
-                for(int y=0;y<World.Size;y++){
-                    var blockPos = new Vector3Int(x,y,z);
 
-                    var chunkObject = Instantiate(ChunkRendererPrefab, new Vector3(), Quaternion.identity, transform);       
-                    chunkObject.SetActive(false);
-                    chunkRenderers.Add(blockPos, chunkObject);
+    private void PreLoadPlayerLevel(){
+        var boundary = GetViewDistanceBoundary();
+        var from = boundary[0];
+        var to = boundary[1];
+
+        for(int y=from.y; y<to.y; y+=Config.ChunkSize){
+            for(int x=from.x; x<to.x; x+=Config.ChunkSize){
+                for(int z=from.z; z<to.z; z+=Config.ChunkSize){
+                    var pos = new Vector3Int(x,y,z).ToChunkAligned();
+
+                    LoadAndRenderNewChunk(pos);  
                 }
             }
         }
@@ -44,82 +55,141 @@ public class WorldRenderer : MonoBehaviour
     void Update()
     {
         var playerPos = Vector3Int.FloorToInt(Player.transform.position);
-        if(world.Update(playerPos)){
-            world.LoadChunks();
-            Render();
+
+        if(UpdateCenterPos(playerPos)){
+            //Debug.Log("CenterChunkPos changed:"+playerPos);
+            RenderChunks();
         }
     }
 
-    private void Render()
+    public bool UpdateCenterPos(Vector3Int playerPos)
     {
-        var newChunkRenderers = new Dictionary<Vector3Int, GameObject>();
-        var listMissingChunkObjects = new List<Vector3Int>();
+        var chunkPos = playerPos.ToChunkAligned();
 
-        foreach (var key in world.ChunkKeys())
+        if(Vector3.Distance(chunkPos, centerChunkPos) >= Config.ChunkSize){
+            centerChunkPos = chunkPos;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private Vector3Int[] GetViewDistanceBoundary(){
+        return new Vector3Int[]{
+            centerChunkPos - new Vector3Int(ViewDistanceBlockCount, ViewDistanceBlockCount, ViewDistanceBlockCount),
+            centerChunkPos + new Vector3Int(ViewDistanceBlockCount, ViewDistanceBlockCount, ViewDistanceBlockCount) + new Vector3Int(Config.ChunkSize, Config.ChunkSize, Config.ChunkSize)
+        };
+    }
+
+    private void RenderChunks()
+    {
+        StopCoroutine(DelayBuildChunks());
+
+        //Debug.Log("RenderChunks start!");
+
+        var notUsedChunkRenderersKey = new HashSet<Vector3Int>(activeChunkRenderers.Keys);
+        
+        renderChunkPosQueue.Clear();
+
+        var boundary = GetViewDistanceBoundary();
+        var from = boundary[0];
+        var to = boundary[1];
+
+        foreach (var pos in notUsedChunkRenderersKey)
         {
-            GameObject obj;
-            if(chunkRenderers.TryGetValue(key, out obj)){
-                var renderer = obj.GetComponent<ChunkRendererInterface>();
-
-                if(renderer.chunk == null){
-                    listMissingChunkObjects.Add(key);
-                }else{
-                    chunkRenderers.Remove(key);
-                    newChunkRenderers.Add(key, obj);
+            //Debug.Log("activeChunkRenderers:"+pos);
+        }
+        
+        for(int y=from.y; y<to.y; y+=Config.ChunkSize){
+            for(int x=from.x; x<to.x; x+=Config.ChunkSize){
+                for(int z=from.z; z<to.z; z+=Config.ChunkSize){
+                    var pos = new Vector3Int(x,y,z).ToChunkAligned();
+                    
+                    //already rendered
+                    if(activeChunkRenderers.ContainsKey(pos)){
+                        //Debug.Log("RenderChunk:"+pos+" visible!");
+                        notUsedChunkRenderersKey.Remove(pos);
+                    }else{
+                        //Debug.Log("RenderChunk:"+pos+" queue!");
+                        renderChunkPosQueue.Add(pos);
+                    }
                 }
-                
-                //Debug.Log("WorldRenderer: Already exists:"+key);
-            }else{
-                listMissingChunkObjects.Add(key);
-                //Debug.Log("WorldRenderer: Missing:"+key+" hash:"+key.GetHashCode());
             }
         }
 
-        var notUsedObjects = chunkRenderers.Keys.ToList();
-
-        //Debug.Log("WorldRenderer: Missing total:"+listMissingChunkObjects.Count);
-        //Debug.Log("WorldRenderer: notUsedObjects total:"+notUsedObjects.Count);
-
-        if(listMissingChunkObjects.Count != notUsedObjects.Count)
+        //deactivate not used objects
+        foreach (var pos in notUsedChunkRenderersKey)
         {
-            throw new UnityException("WorldRenderer is not initialized correctly. Missing is not matches the not used:"+listMissingChunkObjects.Count+","+notUsedObjects.Count);
-        }
-
-        foreach (var key in listMissingChunkObjects)
-        {
-            var notUsedKey = notUsedObjects.First();
-            notUsedObjects.RemoveAt(0);
-            
-            //Debug.Log("WorldRenderer: notUsedKey:"+notUsedKey+" hash:"+notUsedKey.GetHashCode()+" key:"+key+" hash:"+key.GetHashCode());
-
-            var obj = chunkRenderers[notUsedKey];
-            chunkRenderers.Remove(notUsedKey);
-
+            var obj = activeChunkRenderers[pos];
             obj.SetActive(false);
 
-            var renderer = obj.GetComponent<ChunkRendererInterface>();
-            var chunk = world.GetChunk(key);
-
-            //Debug.Log("WorldRenderer: chunk:"+chunk);
-
-            renderer.chunk = chunk;
-            renderer.shouldRender = true;
-
-            obj.name = chunk.Name;
-            obj.transform.position = chunk.Pos;
-            obj.SetActive(true);
-            
-            newChunkRenderers.Add(key, obj);
+            activeChunkRenderers.Remove(pos);
+            notActiveChunkRenderers.Enqueue(obj);
         }
 
-        if(chunkRenderers.Count != 0)
-        {
-            throw new UnityException("WorldRenderer is not initialized correctly. There are some renderers left:"+chunkRenderers.Count);
+        if(renderChunkPosQueue.Contains(centerChunkPos)){
+            LoadAndRenderNewChunk(centerChunkPos);
         }
 
-        //Debug.Log("WorldRenderer: newChunkRenderers:"+newChunkRenderers.Count);
+        //Debug.Log("renderChunkPosQueue:"+renderChunkPosQueue.Count);
+        //Debug.Log("activeChunkRenderers:"+activeChunkRenderers.Count);
+        //Debug.Log("notActiveChunkRenderers:"+notActiveChunkRenderers.Count);
+        
+        //Debug.Log("RenderChunks end! Starting Coroutine!");
 
-        chunkRenderers = newChunkRenderers;
+        StartCoroutine(DelayBuildChunks());
     }
 
+    public IEnumerator DelayBuildChunks()
+    {
+        //Debug.Log("DelayBuildChunks start!");
+
+        while(renderChunkPosQueue.Count > 0)
+        {
+            var pos = renderChunkPosQueue.OrderBy(p => Vector3Int.Distance(p, centerChunkPos)).First();
+            Debug.Log("DelayBuildChunks:"+pos);
+            renderChunkPosQueue.Remove(pos);
+            LoadAndRenderNewChunk(pos);
+
+            //Debug.Log("renderChunkPosQueue:"+renderChunkPosQueue.Count);
+            //Debug.Log("activeChunkRenderers:"+activeChunkRenderers.Count);
+            //Debug.Log("notActiveChunkRenderers:"+notActiveChunkRenderers.Count);
+
+            yield return new WaitForSeconds(.05f);
+        }
+        //Debug.Log("DelayBuildChunks end!");
+    }
+
+    private void LoadAndRenderNewChunk(Vector3Int pos)
+    {
+        //Debug.Log("LoadAndRenderNewChunk:"+pos);
+
+        if(activeChunkRenderers.ContainsKey(pos)){
+            //Debug.Log("Already Active:"+pos);
+            return;
+        }
+
+        GameObject obj;
+        if(notActiveChunkRenderers.Count == 0){
+            obj = Instantiate(ChunkRendererPrefab, new Vector3(), Quaternion.identity, transform);       
+            obj.SetActive(false);
+            //Debug.Log("Create New:"+pos);
+        }else{
+            obj = notActiveChunkRenderers.Dequeue();
+            //Debug.Log($"Re Use({pos}):"+obj.name);
+        }
+
+        var renderer = obj.GetComponent<ChunkRendererInterface>();
+        var chunk = world.GetChunk(pos);
+
+        renderer.chunk = chunk;
+        renderer.shouldRender = true;
+
+        obj.name = chunk.Name;
+        obj.transform.position = chunk.Pos;
+        obj.SetActive(true);
+
+        activeChunkRenderers.Add(chunk.Pos, obj);
+    }
 }

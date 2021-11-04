@@ -31,4 +31,12 @@ public static class VectorMethodExtension
     public static Vector3Int Abs(this Vector3Int v){
         return new Vector3Int(Mathf.Abs(v.x), Mathf.Abs(v.y), Mathf.Abs(v.z));
     }
+
+    public static Vector3Int ToChunkAligned(this Vector3Int v){
+        return new Vector3Int(RoundToChunkSize(v.x), RoundToChunkSize(v.y), RoundToChunkSize(v.z));
+    }
+
+    private static int RoundToChunkSize(int a){
+        return (int)Mathf.Floor((float)a/(float)Config.ChunkSize)*Config.ChunkSize;
+    }
 }

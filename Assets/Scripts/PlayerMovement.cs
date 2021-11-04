@@ -49,16 +49,6 @@ public class PlayerMovement : MonoBehaviour
         LookPlayer();
     }
 
-    void OnDrawGizmosSelected()
-    {
-        if(checkFrontPosTop != null && checkFrontPosBottom != null){
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(checkFrontPosTop, checkFrontRadius);
-            Gizmos.DrawWireSphere(checkFrontPosBottom+new Vector3(0f, 0.5f, 0f), checkFrontRadius);
-            Gizmos.DrawWireSphere(checkFrontPosBottom, checkFrontRadius);
-        }
-    }
-
     private void MovePlayer()
     {       
         var moveVector = transform.TransformDirection(playerMovementInput);
@@ -85,8 +75,6 @@ public class PlayerMovement : MonoBehaviour
         playerRot += playerLookInput * mouseSensitivity * mouseSensitivityMultiplier * Time.fixedDeltaTime;
 
         playerRot.x = Mathf.Clamp(playerRot.x, -clampAngle, clampAngle);
-
-        Debug.Log("LookPlayer:"+playerRot);
 
         rigidBody.rotation = Quaternion.Euler(new Vector3(0f, playerRot.y, 0f));
         playerCamera.localRotation = Quaternion.Euler(new Vector3(playerRot.x, 0f, 0f));

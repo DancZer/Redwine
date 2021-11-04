@@ -4,6 +4,6 @@ using UnityEngine;
 
 public class Config
 {
-    public const int CHUNK_SIZE = 16;
-    public const int WORLD_CHUNK_VIEW_DISTANCE = 5;
+    public const int ChunkSize = 8;
+    public const int ViewDistanceChunkCount = 8;
 }

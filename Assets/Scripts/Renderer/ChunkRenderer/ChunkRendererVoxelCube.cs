@@ -19,6 +19,8 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
         meshCollider = GetComponent<MeshCollider>();
+
+        Render();
     }
 
     private void OnDisable() {
@@ -56,9 +58,9 @@ public class ChunkRendererVoxelCube : MonoBehaviour
 
         //Debug.Log("BuildChunkMesh:"+chunk.BlockPos);
         var numFaces = 0;
-        for(int x=0; x<Config.CHUNK_SIZE; x++){
-            for(int z=0; z<Config.CHUNK_SIZE; z++){
-                for(int y=0; y<Config.CHUNK_SIZE; y++){
+        for(int x=0; x<Config.ChunkSize; x++){
+            for(int z=0; z<Config.ChunkSize; z++){
+                for(int y=0; y<Config.ChunkSize; y++){
                     var blockPos = new Vector3Int(x, y, z);
 
                     var mainBlock = GetBlock(blockPos);
