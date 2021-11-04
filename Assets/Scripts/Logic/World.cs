@@ -4,23 +4,23 @@ using UnityEngine;
 using System.Linq;
 
 //This is more like the player area, not the whole world. functionality should be split
-public class World
+public static class World
 {
-    private Dictionary<Vector3Int, Chunk> chunks = new Dictionary<Vector3Int, Chunk>();
+    private static Dictionary<Vector3Int, Chunk> chunks = new Dictionary<Vector3Int, Chunk>();
 
-    private WorldGenerator generator = new WorldGenerator();
+    private static WorldGenerator generator = new WorldGenerator();
 
-    public void Init()
+    public static void Init()
     {
         generator.Init(Config.RandomSeed);
     }
 
-    public Vector3Int GetStartPos()
+    public static Vector3Int GetStartPos()
     {
         return new Vector3Int(0, Mathf.FloorToInt(generator.GetBaseLandHeight(0, 0))+2, 0);
     }
 
-    public Chunk GetChunk(Vector3Int pos)
+    public static Chunk GetChunk(Vector3Int pos)
     {       
         var chunkPos = pos.ToChunkAligned();
 
