@@ -65,7 +65,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if (Input.GetButton("Jump")){
-            if(Physics.CheckSphere(feetTransform.position, 0.1f, floorMask)){
+            if(Physics.CheckSphere(feetTransform.position, 0.2f, floorMask)){
                 rigidBody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             }
         }
