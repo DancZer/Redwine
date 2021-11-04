@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WorldModi : MonoBehaviour
+public class PlayerMiner : MonoBehaviour
 {
     public LayerMask groundLayer;
 
-    float maxDist = 4;
+    private float maxDist = 4;
 
     // Start is called before the first frame update
     void Start()
@@ -28,15 +28,26 @@ public class WorldModi : MonoBehaviour
                 Vector3 pointInTargetBlock;
 
                 //destroy
-                if(rightClick)
-                    pointInTargetBlock = hitInfo.point + transform.forward * .01f;
-                else
-                    pointInTargetBlock = hitInfo.point - transform.forward * .01f;
+                if(rightClick){
+                    pointInTargetBlock = hitInfo.point + transform.forward * .1f;
+                }else{
+                    pointInTargetBlock = hitInfo.point - transform.forward * .1f;
+                }
 
                 var blockPos = Vector3Int.FloorToInt(pointInTargetBlock);
 
-                var chunk = World.GetChunk(blockPos);
-                var blockPosRel = blockPos - chunk.Pos;
+                var head = Vector3Int.FloorToInt(transform.position);
+                var foot = head.Below();
+                
+                //Debug.Log("blockPos:"+blockPos+" head:"+head+" foot:"+foot);
+
+                if(blockPos != head && blockPos != foot){
+                    if(rightClick){
+                        World.SetBlockType(blockPos, BlockType.Air);
+                    }else{
+                        World.SetBlockType(blockPos, BlockType.Dirt);
+                    }
+                }
             }
         }
     }

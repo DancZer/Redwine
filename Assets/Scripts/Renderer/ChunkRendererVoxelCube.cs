@@ -4,16 +4,19 @@ using UnityEngine;
 
 public class ChunkRendererVoxelCube : MonoBehaviour
 {
-    private ChunkRendererInterface chunkRenderer;
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
     private MeshCollider meshCollider;
-    private IChunkInterface chunk;
-    private bool disabled;
+
+    private float lastRenderedTime;
+    private IChunkInterface _chunk;
+    public IChunkInterface Chunk { set{
+        _chunk = value;
+        lastRenderedTime = 0;
+    }}
 
     void Start()
     {
-        chunkRenderer = GetComponent<ChunkRendererInterface>();
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
         meshCollider = GetComponent<MeshCollider>();
@@ -22,8 +25,6 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         color.a = 0;
 
         meshRenderer.material.SetColor("_Color", color);
-
-        Render();
     }
 
     private void OnDisable() {
@@ -38,25 +39,20 @@ public class ChunkRendererVoxelCube : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(chunkRenderer.shouldRender){
-            Render();
-            chunkRenderer.shouldRender = false;
+        if(lastRenderedTime == 0 || lastRenderedTime != _chunk.LastChangedTime){
+            var mesh = BuildChunkMesh();
+        
+            meshFilter.mesh = mesh;
+            meshCollider.sharedMesh = mesh;
+
+            lastRenderedTime = _chunk.LastChangedTime;
             meshRenderer.enabled = meshCollider.enabled = true;
         }
 
         var color = meshRenderer.material.color;
-        color.a = chunkRenderer.chunk.Opacity;
+        color.a = _chunk.Opacity;
 
         meshRenderer.material.SetColor("_Color", color);
-    }
-
-    private void Render(){
-        chunk = chunkRenderer.chunk;
-
-        var mesh = BuildChunkMesh();
-        
-        meshFilter.mesh = mesh;
-        meshCollider.sharedMesh = mesh;
     }
     
     private Mesh BuildChunkMesh()
@@ -64,9 +60,9 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         var verts = new List<Vector3>();
         var uvs = new  List<Vector2>();
 
-        //Debug.Log("BuildChunkMesh:"+chunk.BlockPos);
+        //Debug.Log("BuildChunkMesh:"+lastRenderedTime+", "+_chunk.LastChangedTime);
         var numFaces = 0;
-        var chunkSize = chunk.Size;
+        var chunkSize = _chunk.Size;
         for(int x=0; x<chunkSize.x; x++){
             for(int z=0; z<chunkSize.z; z++){
                 for(int y=0; y<chunkSize.y; y++){
@@ -169,7 +165,7 @@ public class ChunkRendererVoxelCube : MonoBehaviour
     }
 
     private Block GetBlock(Vector3Int pos){
-        var blockType = chunk.GetBlockType(pos);
+        var blockType = _chunk.GetBlockType(pos);
 
         return Blocks.blocks[blockType];
     }

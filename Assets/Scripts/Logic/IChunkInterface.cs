@@ -8,4 +8,5 @@ public interface IChunkInterface
     BlockType GetBlockType(Vector3Int pos);
     void SetBlockType(Vector3Int pos, BlockType type);
     float Opacity {get;}
+    float LastChangedTime {get;}
 }

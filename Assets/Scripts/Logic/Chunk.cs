@@ -15,6 +15,7 @@ public class Chunk : IChunkInterface
         }
     }
     public float Opacity {get;} = 1;
+    public float LastChangedTime {get; private set;}
     
     public Chunk(Vector3Int pos)
     {
@@ -31,6 +32,8 @@ public class Chunk : IChunkInterface
     public void SetBlockType(Vector3Int pos, BlockType type)
     {
         blockStates[pos.x+1, pos.y+1, pos.z+1] = type;
+
+        LastChangedTime = Time.realtimeSinceStartup;
     }
 
     public override string ToString()

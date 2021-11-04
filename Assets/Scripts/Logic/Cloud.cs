@@ -7,12 +7,13 @@ public class Cloud : IChunkInterface
     private const float MaxOpacity = 0.7f;
     private const float PasePercentage = 0.1f;
     private BlockType[,,] blockStates;
-    public Vector3 Pos;
+    public Vector3 Pos {get; private set;}
     public Vector3Int Size {get;}
     public float AgeTime {get; private set;}
     private float lifeTime;
     private Vector3 velocity;
     public string Name {get;}
+    public float LastChangedTime {get; private set;}
 
     public float Opacity {
         get{
@@ -55,5 +56,7 @@ public class Cloud : IChunkInterface
     public void SetBlockType(Vector3Int pos, BlockType type)
     {
         blockStates[pos.x, pos.y, pos.z] = type;
+
+        LastChangedTime = Time.realtimeSinceStartup;
     }
 }

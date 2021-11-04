@@ -31,4 +31,62 @@ public static class World
         }
         return chunk;
     }
+
+    public static BlockType GetBlockType(Vector3Int pos)
+    {
+        var chunk = GetChunk(pos);
+
+        var relPos = pos-chunk.Pos;
+
+        return chunk.GetBlockType(relPos);
+    }
+    public static void SetBlockType(Vector3Int pos, BlockType blockType)
+    {
+        var chunk = GetChunk(pos);
+        var relPos = pos-chunk.Pos;
+
+        chunk.SetBlockType(relPos, blockType);
+
+        if(relPos.x == 0)
+        {
+            var westChunk = GetChunk(chunk.Pos.WestChunk());
+            var westRelPos = pos-westChunk.Pos;
+            westChunk.SetBlockType(westRelPos, blockType);
+        }
+
+        if(relPos.x == Config.ChunkSize-1)
+        {
+            var westChunk = GetChunk(chunk.Pos.EastChunk());
+            var westRelPos = pos-westChunk.Pos;
+            westChunk.SetBlockType(westRelPos, blockType);
+        }
+
+        if(relPos.y == 0)
+        {
+            var westChunk = GetChunk(chunk.Pos.BelowChunk());
+            var westRelPos = pos-westChunk.Pos;
+            westChunk.SetBlockType(westRelPos, blockType);
+        }
+
+        if(relPos.y == Config.ChunkSize-1)
+        {
+            var westChunk = GetChunk(chunk.Pos.AboveChunk());
+            var westRelPos = pos-westChunk.Pos;
+            westChunk.SetBlockType(westRelPos, blockType);
+        }
+
+        if(relPos.z == 0)
+        {
+            var westChunk = GetChunk(chunk.Pos.SouthChunk());
+            var westRelPos = pos-westChunk.Pos;
+            westChunk.SetBlockType(westRelPos, blockType);
+        }
+
+        if(relPos.z == Config.ChunkSize-1)
+        {
+            var westChunk = GetChunk(chunk.Pos.NorthChunk());
+            var westRelPos = pos-westChunk.Pos;
+            westChunk.SetBlockType(westRelPos, blockType);
+        }
+    }
 }

@@ -86,9 +86,8 @@ public class WeatherRenderer : MonoBehaviour
             obj = notActiveCloudRenderers.Dequeue();
         }
 
-        var renderer = obj.GetComponent<ChunkRendererInterface>();
-        renderer.chunk = cloud;
-        renderer.shouldRender = true;
+        var renderer = obj.GetComponent<ChunkRendererVoxelCube>();
+        renderer.Chunk = cloud;
 
         obj.name = cloud.Name;
         obj.transform.position = cloud.Pos;

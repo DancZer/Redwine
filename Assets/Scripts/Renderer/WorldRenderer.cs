@@ -5,7 +5,6 @@ using System.Linq;
 
 public class WorldRenderer : MonoBehaviour
 {
-    private readonly World world = new World();
     private readonly Dictionary<Vector3Int, GameObject> activeChunkRenderers = new Dictionary<Vector3Int, GameObject>();
     private readonly Queue<GameObject> notActiveChunkRenderers = new Queue<GameObject>();
     private readonly List<Vector3Int> renderChunkPosQueue = new List<Vector3Int>();
@@ -13,13 +12,12 @@ public class WorldRenderer : MonoBehaviour
     public Transform PlayerPos;
     public GameObject ChunkRendererPrefab;
 
-
     // Start is called before the first frame update
     void Start()
     {        
-        world.Init();
+        World.Init();
 
-        var startPos = world.GetStartPos() + new Vector3(0.5f, 0, 0.5f);
+        var startPos = World.GetStartPos() + new Vector3(0.5f, 0, 0.5f);
         
         //Debug.Log("Start Player startPos:"+startPos);
 
@@ -178,11 +176,10 @@ public class WorldRenderer : MonoBehaviour
             //Debug.Log($"Re Use({pos}):"+obj.name);
         }
 
-        var renderer = obj.GetComponent<ChunkRendererInterface>();
-        var chunk = world.GetChunk(pos);
+        var renderer = obj.GetComponent<ChunkRendererVoxelCube>();
+        var chunk = World.GetChunk(pos);
 
-        renderer.chunk = chunk;
-        renderer.shouldRender = true;
+        renderer.Chunk = chunk;
 
         obj.name = chunk.Name;
         obj.transform.position = chunk.Pos;
