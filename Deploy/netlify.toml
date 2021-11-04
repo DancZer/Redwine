@@ -1,0 +1,10 @@
+[[headers]]
+  for = "/*.gz"
+  [headers.values]
+    Content-Encoding = "gzip"
+	
+[[headers]]
+  for = "/*.wasm.gz"
+  [headers.values]
+	Content-Encoding = "gzip"
+    Content-Type = "application/wasm"
