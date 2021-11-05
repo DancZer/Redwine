@@ -17,7 +17,10 @@ public static class World
 
     public static Vector3Int GetStartPos()
     {
-        return new Vector3Int(0, Mathf.FloorToInt(generator.GetBaseLandHeight(0, 0))+2, 0);
+        var startPos = new Vector3Int(0,0,0);
+        startPos.y = generator.GetBaseLandHeight(startPos)+2;
+
+        return startPos;
     }
 
     public static Chunk GetChunk(Vector3Int pos)

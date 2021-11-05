@@ -15,19 +15,8 @@ public class WorldGenerator
 
         for(int x=-1; x<Config.ChunkSize+1; x++){
             for(int z=-1; z<Config.ChunkSize+1; z++){
-
-                var baseLine = GetBaseLandHeight(chunk.Pos.x+x, chunk.Pos.z+z);
-
                 for(int y=-1; y<Config.ChunkSize+1; y++){
-                    var block = BlockType.Air;
-
-                    if(chunk.Pos.y + y == baseLine){
-                        block = BlockType.DirtGrass;
-                    }else if(chunk.Pos.y + y < baseLine){
-                        block = BlockType.Dirt;
-                    }
-
-                    chunk.SetBlockType(new Vector3Int(x, y, z), block);
+                    chunk.SetBlockType(new Vector3Int(x, y, z), GetBlockType(chunk.Pos + new Vector3Int(x,y,z)));
                 }
             }
         }
@@ -35,16 +24,46 @@ public class WorldGenerator
         return chunk;
     }
 
-    public int GetBaseLandHeight(int x, int z){
-        //print(noise.GetSimplex(x, z));
-        float simplex1 = noise.GetSimplex(x*.8f, z*.8f)*10;
-        float simplex2 = noise.GetSimplex(x * 3f, z * 3f) * 10*(noise.GetSimplex(x*.3f, z*.3f)+.5f);
+    public int GetBaseLandHeight(Vector3Int pos){
+        float simplex1 = noise.GetSimplex(pos.x*.8f, pos.z*.8f)*10;
+        float simplex2 = noise.GetSimplex(pos.x * 3f, pos.z * 3f) * 10*(noise.GetSimplex(pos.x*.3f, pos.z*.3f)+.5f);
 
         float heightMap = simplex1 + simplex2;
 
         //add the 2d noise to the middle of the terrain chunk
-        float baseLandHeight = Config.ChunkSize * .5f + heightMap;
+        return Mathf.CeilToInt(Config.ChunkSize * .5f + heightMap);
+    }  
 
-        return Mathf.FloorToInt(baseLandHeight);
+    private BlockType GetBlockType(Vector3Int pos){
+        
+        var baseLandHeight = GetBaseLandHeight(pos);
+
+        //over the surface
+        if(pos.y > baseLandHeight){
+            return BlockType.Air;
+        //the surface
+        }else if(pos.y == baseLandHeight){
+            return BlockType.DirtGrass;
+        }
+
+         //3d noise for caves and overhangs and such
+        float caveNoise1 = noise.GetPerlinFractal(pos.x*5f, pos.y*10f, pos.z*5f);
+        float caveMask = noise.GetSimplex(pos.x * .3f, pos.z * .3f)+.3f;
+
+        if(caveNoise1 > Mathf.Max(caveMask, .2f)){
+            return BlockType.Air;
+        }
+
+        float simplexStone1 = noise.GetSimplex(pos.x * 1f, pos.z * 1f) * 10;
+        float simplexStone2 = (noise.GetSimplex(pos.x * 5f, pos.z * 5f)+.5f) * 20 * (noise.GetSimplex(pos.x * .3f, pos.z * .3f) + .5f);
+
+        float stoneHeightMap = simplexStone1 + simplexStone2;
+        float baseStoneHeight = Config.StoneLayerStart + stoneHeightMap;
+
+        if(pos.y > baseStoneHeight){
+            return BlockType.Dirt;
+        }else{
+            return BlockType.Stone;
+        }
     }
 }

@@ -14,6 +14,9 @@ public class Cloud : IChunkInterface
     private Vector3 velocity;
     public string Name {get;}
     public float LastChangedTime {get; private set;}
+    public bool IsAlive {get{
+        return AgeTime<lifeTime;
+    }}
 
     public float Opacity {
         get{

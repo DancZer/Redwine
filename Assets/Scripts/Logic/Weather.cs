@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Weather
 {
@@ -19,9 +20,15 @@ public class Weather
     }
 
     public void Update(Vector3 pos, int viewDistance){
+
         foreach (var cloud in clouds)
         {
             cloud.Update();
+        }
+
+        foreach (var c in clouds.Where(c => !c.IsAlive))
+        {
+            clouds.Remove(c);
         }
 
         if(clouds.Count<10)
