@@ -57,3 +57,6 @@ rejected_assets/
 
 # Log
 Logs/*.log
+
+#user settings
+UserSettings/*
