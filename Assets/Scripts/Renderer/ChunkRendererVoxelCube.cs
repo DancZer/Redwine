@@ -15,24 +15,30 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         lastRenderedTime = 0;
     }}
 
+    public bool RenderSelf;
+
     void Start()
     {
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
         meshCollider = GetComponent<MeshCollider>();
-                
-        var color = meshRenderer.material.color;
-        color.a = 0;
 
-        meshRenderer.material.SetColor("_Color", color);
+        if(RenderSelf){
+            var color = meshRenderer.material.color;
+            color.a = 0;
+
+            meshRenderer.material.SetColor("_Color", color);
+        }  
     }
 
     private void OnDisable() {
-        if(meshRenderer != null){
-            meshRenderer.enabled = false;
-        }
-        if(meshCollider != null){
-            meshCollider.enabled = false;
+        if(RenderSelf){
+            if(meshRenderer != null){
+                meshRenderer.enabled = false;
+            }
+            if(meshCollider != null){
+                meshCollider.enabled = false;
+            }
         }
     }
 
@@ -43,16 +49,22 @@ public class ChunkRendererVoxelCube : MonoBehaviour
             var mesh = BuildChunkMesh();
         
             meshFilter.mesh = mesh;
-            meshCollider.sharedMesh = mesh;
-
             lastRenderedTime = _chunk.LastChangedTime;
-            meshRenderer.enabled = meshCollider.enabled = true;
+
+            if(RenderSelf){
+                meshCollider.sharedMesh = mesh;
+
+                meshRenderer.enabled = meshCollider.enabled = true;
+            }
         }
 
-        var color = meshRenderer.material.color;
-        color.a = _chunk.Opacity;
+            
+        if(RenderSelf){
+            var color = meshRenderer.material.color;
+            color.a = _chunk.Opacity;
 
-        meshRenderer.material.SetColor("_Color", color);
+            meshRenderer.material.SetColor("_Color", color);
+        }
     }
     
     private Mesh BuildChunkMesh()

@@ -82,8 +82,6 @@ public class WorldRenderer : MonoBehaviour
     {
         StopCoroutine(DelayBuildChunks());
 
-        //Debug.Log("RenderChunks start!");
-
         var notUsedChunkRenderersKey = new HashSet<Vector3Int>(activeChunkRenderers.Keys);
         
         renderChunkPosQueue.Clear();
@@ -92,11 +90,6 @@ public class WorldRenderer : MonoBehaviour
         var from = boundary[0];
         var to = boundary[1];
 
-        foreach (var pos in notUsedChunkRenderersKey)
-        {
-            //Debug.Log("activeChunkRenderers:"+pos);
-        }
-        
         for(int y=from.y; y<to.y; y+=Config.ChunkSize){
             for(int x=from.x; x<to.x; x+=Config.ChunkSize){
                 for(int z=from.z; z<to.z; z+=Config.ChunkSize){
@@ -104,10 +97,8 @@ public class WorldRenderer : MonoBehaviour
                     
                     //already rendered
                     if(activeChunkRenderers.ContainsKey(pos)){
-                        //Debug.Log("RenderChunk:"+pos+" visible!");
                         notUsedChunkRenderersKey.Remove(pos);
                     }else{
-                        //Debug.Log("RenderChunk:"+pos+" queue!");
                         renderChunkPosQueue.Add(pos);
                     }
                 }
@@ -128,41 +119,24 @@ public class WorldRenderer : MonoBehaviour
             LoadAndRenderNewChunk(centerChunkPos);
         }
 
-        //Debug.Log("renderChunkPosQueue:"+renderChunkPosQueue.Count);
-        //Debug.Log("activeChunkRenderers:"+activeChunkRenderers.Count);
-        //Debug.Log("notActiveChunkRenderers:"+notActiveChunkRenderers.Count);
-        
-        //Debug.Log("RenderChunks end! Starting Coroutine!");
-
         StartCoroutine(DelayBuildChunks());
     }
 
     public IEnumerator DelayBuildChunks()
     {
-        //Debug.Log("DelayBuildChunks start!");
-
         while(renderChunkPosQueue.Count > 0)
         {
             var pos = renderChunkPosQueue.OrderBy(p => Vector3Int.Distance(p, centerChunkPos)).First();
-            //Debug.Log("DelayBuildChunks:"+pos);
             renderChunkPosQueue.Remove(pos);
             LoadAndRenderNewChunk(pos);
 
-            //Debug.Log("renderChunkPosQueue:"+renderChunkPosQueue.Count);
-            //Debug.Log("activeChunkRenderers:"+activeChunkRenderers.Count);
-            //Debug.Log("notActiveChunkRenderers:"+notActiveChunkRenderers.Count);
-
             yield return new WaitForSeconds(.05f);
         }
-        //Debug.Log("DelayBuildChunks end!");
     }
 
     private void LoadAndRenderNewChunk(Vector3Int pos)
     {
-        //Debug.Log("LoadAndRenderNewChunk:"+pos);
-
         if(activeChunkRenderers.ContainsKey(pos)){
-            //Debug.Log("Already Active:"+pos);
             return;
         }
 
@@ -170,10 +144,8 @@ public class WorldRenderer : MonoBehaviour
         if(notActiveChunkRenderers.Count == 0){
             obj = Instantiate(ChunkRendererPrefab, new Vector3(), Quaternion.identity, transform);       
             obj.SetActive(false);
-            //Debug.Log("Create New:"+pos);
         }else{
             obj = notActiveChunkRenderers.Dequeue();
-            //Debug.Log($"Re Use({pos}):"+obj.name);
         }
 
         var renderer = obj.GetComponent<ChunkRendererVoxelCube>();
@@ -186,5 +158,26 @@ public class WorldRenderer : MonoBehaviour
         obj.SetActive(true);
 
         activeChunkRenderers.Add(chunk.Pos, obj);
+
+        UpdateCombinedMesh();
+    }
+
+    private void UpdateCombinedMesh(){
+        
+        CombineInstance[] combine = new CombineInstance[activeChunkRenderers.Count];
+
+        var i=0;
+        foreach (var pos in activeChunkRenderers.Keys)
+        {
+            var obj = activeChunkRenderers[pos];
+            
+            var meshFilter = obj.GetComponent<MeshFilter>();
+
+            combine[i].mesh = meshFilter.mesh;
+            combine[i].transform = meshFilter.transform.localToWorldMatrix;
+        }
+
+        GetComponent<MeshFilter>().mesh = new Mesh();
+        GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
     }
 }
