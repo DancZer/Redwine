@@ -5,16 +5,15 @@ using System.Linq;
 
 public class WorldRenderer : MonoBehaviour
 {
-    private readonly Dictionary<Vector3Int, GameObject> activeChunkRenderers = new Dictionary<Vector3Int, GameObject>();
-    private readonly Queue<GameObject> notActiveChunkRenderers = new Queue<GameObject>();
+    private readonly Dictionary<Vector3Int, VoxelRenderer> activeChunkRenderers = new Dictionary<Vector3Int, VoxelRenderer>();
+    private readonly Queue<VoxelRenderer> notActiveChunkRenderers = new Queue<VoxelRenderer>();
     private readonly List<Vector3Int> renderChunkPosQueue = new List<Vector3Int>();
     private Vector3Int centerChunkPos;
     public Transform PlayerPos;
-    public GameObject ChunkRendererPrefab;
 
     // Start is called before the first frame update
     void Start()
-    {        
+    {
         World.Init();
 
         var startPos = World.GetStartPos() + new Vector3(0.5f, 0, 0.5f);
@@ -109,7 +108,6 @@ public class WorldRenderer : MonoBehaviour
         foreach (var pos in notUsedChunkRenderersKey)
         {
             var obj = activeChunkRenderers[pos];
-            obj.SetActive(false);
 
             activeChunkRenderers.Remove(pos);
             notActiveChunkRenderers.Enqueue(obj);
@@ -140,24 +138,17 @@ public class WorldRenderer : MonoBehaviour
             return;
         }
 
-        GameObject obj;
+        VoxelRenderer renderer;
         if(notActiveChunkRenderers.Count == 0){
-            obj = Instantiate(ChunkRendererPrefab, new Vector3(), Quaternion.identity, transform);       
-            obj.SetActive(false);
+            renderer = new VoxelRenderer();       
         }else{
-            obj = notActiveChunkRenderers.Dequeue();
+            renderer = notActiveChunkRenderers.Dequeue();
         }
 
-        var renderer = obj.GetComponent<ChunkRendererVoxelCube>();
         var chunk = World.GetChunk(pos);
-
         renderer.Chunk = chunk;
 
-        obj.name = chunk.Name;
-        obj.transform.position = chunk.Pos;
-        obj.SetActive(true);
-
-        activeChunkRenderers.Add(chunk.Pos, obj);
+        activeChunkRenderers.Add(chunk.Pos, renderer);
 
         UpdateCombinedMesh();
     }
@@ -166,18 +157,26 @@ public class WorldRenderer : MonoBehaviour
         
         CombineInstance[] combine = new CombineInstance[activeChunkRenderers.Count];
 
+        Debug.Log("UpdateCombinedMesh:"+combine.Length);
+
         var i=0;
         foreach (var pos in activeChunkRenderers.Keys)
         {
             var obj = activeChunkRenderers[pos];
-            
-            var meshFilter = obj.GetComponent<MeshFilter>();
 
-            combine[i].mesh = meshFilter.mesh;
-            combine[i].transform = meshFilter.transform.localToWorldMatrix;
+            combine[i].mesh = obj.BuildMesh();
+
+            var tran = new Matrix4x4();
+            tran.SetTRS(pos, transform.rotation, transform.lossyScale);
+            combine[i].transform = tran;
+
+            ++i;
         }
 
-        GetComponent<MeshFilter>().mesh = new Mesh();
-        GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+        var mesh = new Mesh();
+        mesh.CombineMeshes(combine);
+
+        GetComponent<MeshFilter>().mesh = mesh;
+        GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 }
