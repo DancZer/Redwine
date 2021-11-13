@@ -55,6 +55,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6589301a7cbbf641afe8c5244e6a2da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AtlasMaterial: {fileID: 2100000, guid: 50d9a29ed4c97024da55843b2c000d0f, type: 2}
+  InvisibleShadowCasterMaterial: {fileID: 0}
 --- !u!23 &7083888080581491055
 MeshRenderer:
   m_ObjectHideFlags: 0

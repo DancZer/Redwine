@@ -67,4 +67,12 @@ public static class VectorMethodExtension
     private static int RoundToChunkSize(int a){
         return (int)Mathf.Floor((float)a/(float)Config.ChunkSize)*Config.ChunkSize;
     }
+
+    public static Vector3 Multiply(this Vector3 a, Vector3 b){
+        return new Vector3(a.x*b.x, a.y*b.y, a.z*b.z);
+    }
+
+    public static Vector3 Inverse(this Vector3 a){
+        return new Vector3(Mathf.Abs(a.x-1), Mathf.Abs(a.y-1), Mathf.Abs(a.z-1));
+    }
 }

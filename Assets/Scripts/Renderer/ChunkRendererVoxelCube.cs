@@ -24,10 +24,17 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         meshCollider = GetComponent<MeshCollider>();               
 
-        meshRenderer.materials = new Material[]{
-            AtlasMaterial, 
-            InvisibleShadowCasterMaterial
-        };
+        if(InvisibleShadowCasterMaterial != null){
+            meshRenderer.materials = new Material[]{
+                AtlasMaterial, 
+                InvisibleShadowCasterMaterial
+            };
+        }else{
+            meshRenderer.materials = new Material[]{
+                AtlasMaterial
+            };
+        }
+        
 
         UpdateColor();
     }
@@ -49,7 +56,10 @@ public class ChunkRendererVoxelCube : MonoBehaviour
             mesh.subMeshCount = 2;
 
             BuildAtlasMesh(mesh);
-            BuildInvisibleShadowCasterMesh(mesh); //In some cases few triangles are not rendered
+
+            if(InvisibleShadowCasterMaterial != null){
+                BuildInvisibleShadowCasterMesh(mesh);
+            }
 
             mesh.Optimize();
             mesh.RecalculateNormals();
@@ -121,63 +131,111 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         var chunkSize = _chunk.Size;
 
         for(int x=0; x<chunkSize.x; x++){
+            var belowBuilder = new BlockFaceBuilder(new Vector3(1, 0, 0), new Vector3(0, 0, 1));
+            var aboveBuilder = new BlockFaceBuilder(new Vector3(0, 0, 1), new Vector3(1, 0, 0));
+
             for(int z=0; z<chunkSize.z; z++){
-                //Chunk Bottom
+                //Chunk Below
                 var blockPos = new Vector3Int(x, 0, z);
-
                 var mainBlock = GetBlock(blockPos);
-                if(!mainBlock.IsSolid) continue;
 
-                numFaces = AddBelowSide(blockPos, verts, numFaces);
+                if(mainBlock.IsSolid) {
+                    belowBuilder.ExtendTo(blockPos);
+                }else{
+                    belowBuilder.Close();
+                }
                 
-                //Chunk Top
+                //Chunk Above
                 blockPos = new Vector3Int(x, chunkSize.y-1, z);
-
                 mainBlock = GetBlock(blockPos);
-                if(!mainBlock.IsSolid) continue;
 
-                numFaces = AddAboveSide(blockPos, verts, numFaces);
+                if(mainBlock.IsSolid) {
+                    aboveBuilder.ExtendTo(blockPos+ new Vector3(0,1,0));
+                }else{
+                    aboveBuilder.Close();
+                }
             }
+
+            belowBuilder.Close();
+            aboveBuilder.Close();
+
+            verts.AddRange(belowBuilder.Verts);
+            numFaces += belowBuilder.NumFaces;
+
+            verts.AddRange(aboveBuilder.Verts);
+            numFaces += aboveBuilder.NumFaces;
         }
 
         for(int x=0; x<chunkSize.x; x++){
+            var southBuilder = new BlockFaceBuilder(new Vector3(0, 1, 0), new Vector3(1, 0, 0));
+            var northBuilder = new BlockFaceBuilder(new Vector3(1, 0, 0), new Vector3(0, 1, 0));
+
             for(int y=0; y<chunkSize.y; y++){
                 //Chunk South
                 var blockPos = new Vector3Int(x, y, 0);
-
                 var mainBlock = GetBlock(blockPos);
-                if(!mainBlock.IsSolid) continue;
 
-                numFaces = AddSouthSide(blockPos, verts, numFaces);
-
+                if(mainBlock.IsSolid) {
+                    southBuilder.ExtendTo(blockPos);
+                }else{
+                    southBuilder.Close();
+                }
+                
                 //Chunk North
                 blockPos = new Vector3Int(x, y, chunkSize.z-1);
-
                 mainBlock = GetBlock(blockPos);
-                if(!mainBlock.IsSolid) continue;
 
-                numFaces = AddNorthSide(blockPos, verts, numFaces);
+                if(mainBlock.IsSolid) {
+                    northBuilder.ExtendTo(blockPos + new Vector3(0,0,1));
+                }else{
+                    northBuilder.Close();
+                }
             }
+
+            southBuilder.Close();
+            northBuilder.Close();
+
+            verts.AddRange(southBuilder.Verts);
+            numFaces += southBuilder.NumFaces;
+
+            verts.AddRange(northBuilder.Verts);
+            numFaces += northBuilder.NumFaces;
         }
 
         for(int z=0; z<chunkSize.z; z++){
+            var westBuilder = new BlockFaceBuilder(new Vector3(0, 0, 1), new Vector3(0, 1, 0));
+            var eastBuilder = new BlockFaceBuilder(new Vector3(0, 1, 0), new Vector3(0, 0, 1));
+
             for(int y=0; y<chunkSize.y; y++){
                 //Chunk West
                 var blockPos = new Vector3Int(0, y, z);
-
                 var mainBlock = GetBlock(blockPos);
-                if(!mainBlock.IsSolid) continue;
 
-                numFaces = AddWestSide(blockPos, verts, numFaces);
-
+                if(mainBlock.IsSolid) {
+                    westBuilder.ExtendTo(blockPos);
+                }else{
+                    westBuilder.Close();
+                }
+                
                 //Chunk East
                 blockPos = new Vector3Int(chunkSize.x-1, y, z);
-
                 mainBlock = GetBlock(blockPos);
-                if(!mainBlock.IsSolid) continue;
 
-                numFaces = AddEastSide(blockPos, verts, numFaces);
+                if(mainBlock.IsSolid) {
+                    eastBuilder.ExtendTo(blockPos+ new Vector3(1,0,0));
+                }else{
+                    eastBuilder.Close();
+                }
             }
+
+            westBuilder.Close();
+            eastBuilder.Close();
+
+            verts.AddRange(westBuilder.Verts);
+            numFaces += westBuilder.NumFaces;
+
+            verts.AddRange(eastBuilder.Verts);
+            numFaces += eastBuilder.NumFaces;
         }
 
         var tris = new List<int>();
@@ -195,7 +253,12 @@ public class ChunkRendererVoxelCube : MonoBehaviour
     {
         var block = GetBlock(blockPos.Above());
         if(!block.IsSolid){
-            numFaces = AddAboveSide(blockPos, verts, numFaces);
+            verts.Add(new Vector3(0, 1, 0)+blockPos);
+            verts.Add(new Vector3(0, 1, 1)+blockPos);
+            verts.Add(new Vector3(1, 1, 1)+blockPos);
+            verts.Add(new Vector3(1, 1, 0)+blockPos);
+
+            ++numFaces;
 
             uvs?.AddRange(mainBlock.Top.GetUVs());
         }
@@ -203,61 +266,50 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         return numFaces;
     }
 
-    private int AddAboveSide(Vector3Int blockPos, List<Vector3> verts, int numFaces){
-        verts.Add(new Vector3(0, 1, 0)+blockPos);
-        verts.Add(new Vector3(0, 1, 1)+blockPos);
-        verts.Add(new Vector3(1, 1, 1)+blockPos);
-        verts.Add(new Vector3(1, 1, 0)+blockPos);
-
-        return ++numFaces;
-    }
-
     private int BuildBelowSide(Vector3Int blockPos, List<Vector3> verts, int numFaces, Block mainBlock = null, List<Vector2> uvs = null)
     {
         var block = GetBlock(blockPos.Below());
         if(!block.IsSolid){
-            numFaces = AddBelowSide(blockPos, verts, numFaces);
+            verts.Add(new Vector3(0, 0, 0)+blockPos);
+            verts.Add(new Vector3(1, 0, 0)+blockPos);
+            verts.Add(new Vector3(1, 0, 1)+blockPos);
+            verts.Add(new Vector3(0, 0, 1)+blockPos);
+            
+            ++numFaces;
 
             uvs?.AddRange(mainBlock.Bottom.GetUVs());
         }
 
         return numFaces;
     }
-    private int AddBelowSide(Vector3Int blockPos, List<Vector3> verts, int numFaces){
-        verts.Add(new Vector3(0, 0, 0)+blockPos);
-        verts.Add(new Vector3(1, 0, 0)+blockPos);
-        verts.Add(new Vector3(1, 0, 1)+blockPos);
-        verts.Add(new Vector3(0, 0, 1)+blockPos);
-        
-        return ++numFaces;
-    }
 
     private int BuildSouthSide(Vector3Int blockPos, List<Vector3> verts, int numFaces, Block mainBlock = null, List<Vector2> uvs = null)
     {
         var block = GetBlock(blockPos.South());
         if(!block.IsSolid){
-            numFaces = AddSouthSide(blockPos, verts, numFaces);
+            verts.Add(new Vector3(0, 0, 0)+blockPos);
+            verts.Add(new Vector3(0, 1, 0)+blockPos);
+            verts.Add(new Vector3(1, 1, 0)+blockPos);
+            verts.Add(new Vector3(1, 0, 0)+blockPos);
+            
+            ++numFaces;
 
             uvs?.AddRange(mainBlock.Front.GetUVs());
         }
 
         return numFaces;
-    }
-
-    private int AddSouthSide(Vector3Int blockPos, List<Vector3> verts, int numFaces){
-        verts.Add(new Vector3(0, 0, 0)+blockPos);
-        verts.Add(new Vector3(0, 1, 0)+blockPos);
-        verts.Add(new Vector3(1, 1, 0)+blockPos);
-        verts.Add(new Vector3(1, 0, 0)+blockPos);
-        
-        return ++numFaces;
     }
 
     private int BuildNorthSide(Vector3Int blockPos, List<Vector3> verts, int numFaces, Block mainBlock = null, List<Vector2> uvs = null)
     {
         var block = GetBlock(blockPos.North());
         if(!block.IsSolid){
-            numFaces = AddNorthSide(blockPos, verts, numFaces);
+            verts.Add(new Vector3(1, 0, 1)+blockPos);
+            verts.Add(new Vector3(1, 1, 1)+blockPos);
+            verts.Add(new Vector3(0, 1, 1)+blockPos);
+            verts.Add(new Vector3(0, 0, 1)+blockPos);
+            
+            ++numFaces;
             
             uvs?.AddRange(mainBlock.Front.GetUVs());
         }
@@ -265,53 +317,39 @@ public class ChunkRendererVoxelCube : MonoBehaviour
         return numFaces;
     }
 
-    private int AddNorthSide(Vector3Int blockPos, List<Vector3> verts, int numFaces){
-        verts.Add(new Vector3(1, 0, 1)+blockPos);
-        verts.Add(new Vector3(1, 1, 1)+blockPos);
-        verts.Add(new Vector3(0, 1, 1)+blockPos);
-        verts.Add(new Vector3(0, 0, 1)+blockPos);
-        
-        return ++numFaces;
-    }
 
     private int BuildEastSide(Vector3Int blockPos, List<Vector3> verts, int numFaces, Block mainBlock = null, List<Vector2> uvs = null)
     {
         var block = GetBlock(blockPos.East());
         if(!block.IsSolid){
-            numFaces = AddEastSide(blockPos, verts, numFaces);
-            
+            verts.Add(new Vector3(1, 0, 0)+blockPos);
+            verts.Add(new Vector3(1, 1, 0)+blockPos);
+            verts.Add(new Vector3(1, 1, 1)+blockPos);
+            verts.Add(new Vector3(1, 0, 1)+blockPos);
+
+            ++numFaces;
+
             uvs?.AddRange(mainBlock.Side.GetUVs());
         }
 
         return numFaces;
-    }
-    private int AddEastSide(Vector3Int blockPos, List<Vector3> verts, int numFaces){
-        verts.Add(new Vector3(1, 0, 0)+blockPos);
-        verts.Add(new Vector3(1, 1, 0)+blockPos);
-        verts.Add(new Vector3(1, 1, 1)+blockPos);
-        verts.Add(new Vector3(1, 0, 1)+blockPos);
-        
-        return ++numFaces;
     }
 
     private int BuildWestSide(Vector3Int blockPos, List<Vector3> verts, int numFaces, Block mainBlock = null, List<Vector2> uvs = null)
     {
         var block = GetBlock(blockPos.West());
         if(!block.IsSolid){
-            numFaces = AddWestSide(blockPos, verts, numFaces);
+            verts.Add(new Vector3(0, 0, 1)+blockPos);
+            verts.Add(new Vector3(0, 1, 1)+blockPos);
+            verts.Add(new Vector3(0, 1, 0)+blockPos);
+            verts.Add(new Vector3(0, 0, 0)+blockPos);
+
+            ++numFaces;
 
             uvs?.AddRange(mainBlock.Side.GetUVs());
         }
 
         return numFaces;
-    }
-    private int AddWestSide(Vector3Int blockPos, List<Vector3> verts, int numFaces){
-        verts.Add(new Vector3(0, 0, 1)+blockPos);
-        verts.Add(new Vector3(0, 1, 1)+blockPos);
-        verts.Add(new Vector3(0, 1, 0)+blockPos);
-        verts.Add(new Vector3(0, 0, 0)+blockPos);
-        
-        return ++numFaces;
     }
 
     private Block GetBlock(Vector3Int pos){
