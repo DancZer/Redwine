@@ -6,6 +6,7 @@ public class Chunk : IChunkInterface
 {
     private const int InnerSize = Config.ChunkSize+2;
     private BlockType[,,] blockStates;
+    private List<Vector3Int> treePosList = new List<Vector3Int>();
     public string Name {get;}
     public Vector3Int Pos {get;}
     public Vector3Int Size {
@@ -29,8 +30,14 @@ public class Chunk : IChunkInterface
         return blockStates[pos.x+1, pos.y+1, pos.z+1];
     }
 
-    public void SetBlockType(Vector3Int pos, BlockType type)
+    public void SetBlockType(Vector3Int pos, BlockType type, bool init = false)
     {
+        if(init){
+            if(type == BlockType.TreeTrunk){
+                treePosList.Add(pos);
+            }
+        }
+
         blockStates[pos.x+1, pos.y+1, pos.z+1] = type;
 
         LastChangedTime = Time.realtimeSinceStartup;

@@ -56,7 +56,7 @@ public class Cloud : IChunkInterface
         return blockStates[pos.x, pos.y, pos.z];
     }
 
-    public void SetBlockType(Vector3Int pos, BlockType type)
+    public void SetBlockType(Vector3Int pos, BlockType type, bool init = false)
     {
         blockStates[pos.x, pos.y, pos.z] = type;
 

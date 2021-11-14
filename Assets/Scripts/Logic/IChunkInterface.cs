@@ -6,7 +6,7 @@ public interface IChunkInterface
 {
     Vector3Int Size {get;}
     BlockType GetBlockType(Vector3Int pos);
-    void SetBlockType(Vector3Int pos, BlockType type);
+    void SetBlockType(Vector3Int pos, BlockType type, bool init = false);
     float Opacity {get;}
     float LastChangedTime {get;}
 }
